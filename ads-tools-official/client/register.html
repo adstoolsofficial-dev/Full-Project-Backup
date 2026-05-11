@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء حساب معلن جديد | Ads Tools</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="auth-container">
+        <div style="font-size: 45px; color: #22c55e; text-align: center; margin-bottom: 10px;"><i class="fa-solid fa-user-check"></i></div>
+        <h1>انضم كمعلن جديد</h1>
+        <p class="subtitle">أنشئ حسابك للبدء في عرض إعلاناتك ومتابعتها</p>
+
+        <div class="promo-banner">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+            <span>سجل الآن، ضاعف مبيعاتك، ووصل منتجاتك لشريحة أكبر!</span>
+        </div>
+
+        <form id="registerForm" novalidate>
+            
+            <div class="form-group">
+                <label>اسم الجهة / المعلن <span style="color:#ef4444;">*</span></label>
+                <input type="text" id="storeName" placeholder="أدخل اسم المتجر أو اسمك الثلاثي" required>
+            </div>
+
+            <div class="form-group">
+                <label>نوع الجهة <span style="color:#ef4444;">*</span></label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="accountType" value="شركة">
+                        <div class="radio-box"><i class="fa-solid fa-building"></i> شركة / مؤسسة</div>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="accountType" value="فرد">
+                        <div class="radio-box"><i class="fa-solid fa-user-tie"></i> فرد (عمل حر)</div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>البريد الإلكتروني <span style="color:#ef4444;">*</span></label>
+                <div class="input-wrapper">
+                    <input type="email" id="email" placeholder="example@domain.com">
+                    <button type="button" id="sendEmailOtpBtn" class="btn-action">تأكيد الإيميل</button>
+                    <i class="fa-solid fa-circle-check verified-badge" id="emailVerifiedIcon"></i>
+                </div>
+                <span class="hint-text" id="emailHint">يجب أن يحتوي الإيميل على علامة @ وصيغة صحيحة.</span>
+                
+                <div id="email-recaptcha-container" style="margin-top: 15px; display: flex; justify-content: flex-start;">
+                    <div class="g-recaptcha" data-sitekey="6LcGrIwsAAAAAP5f-fzzMMmHVZzqtpC2OhslCe_3" data-theme="light"></div>
+                </div>
+            </div>
+
+            <div class="otp-section" id="emailOtpSection">
+                <h4><i class="fa-regular fa-envelope" style="margin-left: 5px;"></i> أدخل الرمز المرسل لبريدك (4 أرقام):</h4>
+                <div class="otp-input-group">
+                    <input type="text" id="emailOtpInput" maxlength="4" placeholder="••••" dir="ltr">
+                    <button type="button" id="verifyEmailOtpBtn" class="btn-action" style="background-color: #22c55e;">تحقق</button>
+                </div>
+                <span class="timer-text" id="emailTimerText">الوقت المتبقي: 03:00</span>
+            </div>
+
+            <div class="form-group" id="dynamicPhoneGroup" style="display: none;">
+                <label>رقم الجوال <span id="phoneReqStar" style="color:#ef4444; display: none;">*</span></label>
+                <div class="input-wrapper">
+                    <input type="tel" id="phone" placeholder="مثال: +966500000000" dir="ltr">
+                    <button type="button" id="sendPhoneOtpBtn" class="btn-action" style="display: none;">تأكيد الجوال</button>
+                    <i class="fa-solid fa-circle-check verified-badge" id="phoneVerifiedIcon"></i>
+                </div>
+                <span class="hint-text" id="phoneHint">يجب أن يبدأ بمفتاح الدولة (مثال: +9665).</span>
+            </div>
+
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1; min-width: 200px;">
+                    <label>كلمة المرور <span style="color:#ef4444;">*</span></label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" placeholder="••••••••">
+                        <i class="fa-regular fa-eye-slash toggle-password" id="togglePass"></i>
+                    </div>
+                    <span class="hint-text" id="passwordHint">8 خانات، حرف كبير، حرف صغير، ورمز خاص.</span>
+                </div>
+                
+                <div class="form-group" style="flex: 1; min-width: 200px;">
+                    <label>تأكيد كلمة المرور <span style="color:#ef4444;">*</span></label>
+                    <div class="password-wrapper">
+                        <input type="password" id="confirmPassword" placeholder="••••••••">
+                        <i class="fa-regular fa-eye-slash toggle-password" id="toggleConfirmPass"></i>
+                    </div>
+                    <span class="hint-text" id="confirmPasswordHint">أعد كتابة كلمة المرور لتأكيدها.</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>رابط الموقع أو حساب سوشل ميديا <span style="color:var(--text-sub); font-weight:normal;">(اختياري)</span></label>
+                <input type="url" id="socialLink" placeholder="https://domain.com/" dir="ltr" style="text-align: right;">
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="termsCheck">
+                <label for="termsCheck">أوافق على <a href="#">شروط استخدام الموقع</a> و <a href="#">سياسة الخصوصية</a>. وأقر بأن جميع البيانات المدخلة صحيحة.</label>
+            </div>
+            
+            <button type="submit" id="submitBtn" class="submit-btn">إكمال التسجيل</button>
+        </form>
+
+        <div class="auth-links">
+            لديك حساب بالفعل؟ <a href="login.html">سجل الدخول من هنا</a>
+        </div>
+        <a href="/" class="back-link"><i class="fa-solid fa-arrow-right"></i> العودة للصفحة الرئيسية</a>
+
+        <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center;">
+            <a href="support.html" style="color: var(--text-sub); text-decoration: none; font-size: 13px; font-weight: 600; transition: color 0.3s;" onmouseover="this.style.color='#22c55e'" onmouseout="this.style.color='var(--text-sub)'">
+                <i class="fa-solid fa-headset" style="margin-left: 5px;"></i>التواصل مع الدعم الفني
+            </a>
+            <div style="margin-top: 15px; font-size: 12px; color: #94a3b8;">
+                جميع الحقوق محفوظة © بوابة المعلنين
+            </div>
+        </div>
+    </div>
+
+    <div id="customAlertModal" class="modal">
+        <div class="modal-content">
+            <div id="customAlertIcon" style="font-size: 55px; margin-bottom: 10px;"></div>
+            <h3 id="customAlertMessage"></h3>
+            <button class="btn-alert-ok" id="alertOkBtn">حسناً</button>
+        </div>
+    </div>
+
+    <script type="module" src="register.js"></script>
+</body>
+</html>

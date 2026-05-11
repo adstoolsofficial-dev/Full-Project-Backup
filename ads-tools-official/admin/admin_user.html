@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الصلاحيات والمساعدين | بوابة الإدارة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-body: #f0f4f8;
+            --bg-container: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --border-color: #cbd5e1;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger-text: #ef4444;
+            --success-text: #22c55e;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-body: #0f172a;
+                --bg-container: #1e293b;
+                --text-main: #f8fafc;
+                --text-sub: #94a3b8;
+                --border-color: #334155;
+            }
+        }
+
+        body { font-family: 'Cairo', sans-serif; margin: 0; background-color: var(--bg-body); padding: 30px 20px; transition: 0.3s; }
+        
+        .header-bar { max-width: 1200px; margin: 0 auto 30px auto; display: flex; justify-content: space-between; align-items: center; background: var(--bg-container); padding: 20px 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid #8b5cf6;}
+        .header-bar h1 { margin: 0; color: var(--text-main); font-size: 22px; display: flex; align-items: center; gap: 10px;}
+        .nav-buttons a { background: var(--bg-body); color: var(--text-main); text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; margin-right: 10px; border: 1px solid var(--border-color); transition: 0.3s;}
+        .nav-buttons a:hover { background: var(--border-color); }
+
+        .dashboard-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 2fr; gap: 20px; align-items: start;}
+        
+        @media (max-width: 900px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+
+        .admin-card { background: var(--bg-container); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border-color);}
+        .admin-card h2 { margin-top: 0; color: var(--text-main); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; font-size: 18px;}
+
+        .form-group { margin-bottom: 15px; text-align: right; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .form-group input[type="text"], .form-group input[type="email"], .form-group input[type="password"] { width: 100%; padding: 10px 15px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-family: 'Cairo'; font-size: 14px; outline: none; background: var(--bg-body); color: var(--text-main);}
+        .form-group input:focus { border-color: var(--primary-color); }
+
+        .permissions-box { background: var(--bg-body); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 20px;}
+        .checkbox-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer; color: var(--text-main); font-size: 14px;}
+        .checkbox-item input { width: 18px; height: 18px; cursor: pointer;}
+        
+        .btn-submit { background-color: #8b5cf6; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-family: 'Cairo'; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px;}
+        .btn-submit:hover { background-color: #7c3aed; }
+        .btn-submit:disabled { background-color: var(--text-sub); cursor: not-allowed; }
+
+        /* تصميم الجدول */
+        table { width: 100%; border-collapse: collapse; text-align: right; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); color: var(--text-main); font-size: 14px;}
+        th { background-color: var(--bg-body); font-weight: 700; color: var(--text-sub);}
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 5px; display: inline-block; background: var(--bg-body); border: 1px solid var(--border-color); margin-bottom: 5px;}
+        .badge.super { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border-color: #8b5cf6;}
+        
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-content { background-color: var(--bg-container); padding: 35px 25px; border-radius: 16px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border-top: 5px solid #8b5cf6; animation: fadeIn 0.3s ease;}
+        .modal-content h3 { color: var(--text-main); margin: 20px 0; font-size: 16px;}
+        .btn-alert-ok { background-color: #8b5cf6; color: white; border: none; padding: 10px 30px; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px;}
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <h1><i class="fa-solid fa-users-gear" style="color: #8b5cf6;"></i> إدارة الصلاحيات والمساعدين</h1>
+        <div class="nav-buttons">
+            <a href="admin_tickets.html"><i class="fa-solid fa-headset"></i> التذاكر</a>
+            <a href="#" id="logoutBtn" style="color: var(--danger-text); border-color: var(--danger-text);"><i class="fa-solid fa-arrow-right-from-bracket"></i> خروج</a>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="admin-card">
+            <h2><i class="fa-solid fa-user-plus"></i> إضافة حساب مساعد</h2>
+            <form id="addAdminForm">
+                <div class="form-group">
+                    <label>الاسم</label>
+                    <input type="text" id="adminName" required placeholder="مثال: أحمد (دعم فني)">
+                </div>
+                <div class="form-group">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" id="adminEmail" required dir="ltr" placeholder="admin@domain.com">
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور (مؤقتة)</label>
+                    <input type="password" id="adminPassword" required dir="ltr" placeholder="••••••••" minlength="6">
+                </div>
+
+                <label style="display:block; margin-bottom:10px; font-size:14px; font-weight:bold; color:var(--text-main);">الصلاحيات الممنوحة:</label>
+                <div class="permissions-box">
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="perm_tickets" checked> 
+                        <i class="fa-solid fa-ticket" style="color:#3b82f6;"></i> إدارة التذاكر والدعم الفني
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="perm_ads"> 
+                        <i class="fa-solid fa-bullhorn" style="color:#f59e0b;"></i> قبول وإدارة الإعلانات
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="perm_tools"> 
+                        <i class="fa-solid fa-screwdriver-wrench" style="color:#10b981;"></i> إدارة الأدوات والصفحات
+                    </label>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-submit">
+                    إنشاء الحساب <i class="fa-solid fa-check"></i>
+                </button>
+            </form>
+        </div>
+
+        <div class="admin-card" style="overflow-x: auto;">
+            <h2><i class="fa-solid fa-list"></i> قائمة حسابات الإدارة</h2>
+            <table id="adminsTable">
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>البريد الإلكتروني</th>
+                        <th>النوع والصلاحيات</th>
+                    </tr>
+                </thead>
+                <tbody id="adminsTableBody">
+                    <tr><td colspan="3" style="text-align:center;"><i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="customAlertModal" class="modal">
+        <div class="modal-content">
+            <div id="customAlertIcon" style="font-size: 55px; margin-bottom: 10px;"></div>
+            <h3 id="customAlertMessage"></h3>
+            <button class="btn-alert-ok" onclick="document.getElementById('customAlertModal').style.display='none'">حسناً</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAgdxyNBFrwJuAnoVq6OmZKZZvRknFyVQ8",
+            authDomain: "date-tool-official.firebaseapp.com",
+            projectId: "date-tool-official",
+            storageBucket: "date-tool-official.firebasestorage.app",
+            messagingSenderId: "219114793241",
+            appId: "1:219114793241:web:ee933836c68f7e712fbd88",
+            measurementId: "G-ZKCJC1Y7X7"
+        };
+
+        // التطبيق الرئيسي (للمدير العام)
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // 🛡️ التطبيق الثانوي (حيلة أمنية لإنشاء الحسابات بدون تسجيل خروج المدير العام)
+        const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
+        const secondaryAuth = getAuth(secondaryApp);
+
+        window.showAlert = (msg, type = 'error') => {
+            const modal = document.getElementById('customAlertModal');
+            const icon = document.getElementById('customAlertIcon');
+            const content = modal.querySelector('.modal-content');
+
+            if (type === 'success') {
+                icon.innerHTML = '<i class="fa-regular fa-circle-check" style="color: #22c55e;"></i>';
+                content.style.borderTopColor = '#22c55e';
+            } else {
+                icon.innerHTML = '<i class="fa-regular fa-circle-xmark" style="color: #ef4444;"></i>';
+                content.style.borderTopColor = '#ef4444';
+            }
+            document.getElementById('customAlertMessage').innerHTML = msg;
+            modal.style.display = 'flex';
+        };
+
+        // 🛡️ التحقق الأمني المزدوج للمدير العام
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const adminDoc = await getDoc(doc(db, "admins", user.uid));
+                if (adminDoc.exists() && adminDoc.data().role === 'super_admin') {
+                    // مصرح له، جلب قائمة المساعدين
+                    fetchAdmins();
+                } else {
+                    // مساعد عادي أو متسلل -> طرد
+                    await signOut(auth);
+                    window.location.href = 'admin_login.html';
+                }
+            } else {
+                window.location.href = 'admin_login.html';
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            signOut(auth).then(() => window.location.href = 'admin_login.html');
+        });
+
+        // جلب قائمة الحسابات
+        async function fetchAdmins() {
+            const tbody = document.getElementById('adminsTableBody');
+            try {
+                const querySnapshot = await getDocs(collection(db, "admins"));
+                tbody.innerHTML = '';
+                
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    let badges = '';
+                    
+                    if(data.role === 'super_admin') {
+                        badges = '<span class="badge super"><i class="fa-solid fa-crown"></i> مدير عام (كافة الصلاحيات)</span>';
+                    } else {
+                        if(data.permissions?.manage_tickets) badges += '<span class="badge">إدارة التذاكر</span>';
+                        if(data.permissions?.manage_ads) badges += '<span class="badge">إدارة الإعلانات</span>';
+                        if(data.permissions?.manage_tools) badges += '<span class="badge">إدارة الأدوات</span>';
+                        if(!badges) badges = '<span class="badge" style="color:var(--danger-text)">بدون صلاحيات حالياً</span>';
+                    }
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${data.name || 'بدون اسم'}</strong></td>
+                            <td dir="ltr" style="text-align:right;">${data.email || 'غير متوفر'}</td>
+                            <td>${badges}</td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="3" style="color:red; text-align:center;">حدث خطأ أثناء جلب البيانات. تأكد من إعطاء نفسك صلاحية super_admin أولاً.</td></tr>';
+            }
+        }
+
+        // إنشاء مساعد جديد
+        document.getElementById('addAdminForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('adminName').value.trim();
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value;
+            const btn = document.getElementById('submitBtn');
+
+            const permissions = {
+                manage_tickets: document.getElementById('perm_tickets').checked,
+                manage_ads: document.getElementById('perm_ads').checked,
+                manage_tools: document.getElementById('perm_tools').checked
+            };
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإنشاء...';
+
+            try {
+                // 1. إنشاء الحساب باستخدام التطبيق الثانوي (لكي لا يخرج المدير العام من حسابه)
+                const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+                const newUserId = userCredential.user.uid;
+
+                // 2. تسجيل خروج التطبيق الثانوي فوراً
+                await signOut(secondaryAuth);
+
+                // 3. حفظ بيانات المساعد وصلاحياته في قاعدة البيانات
+                await setDoc(doc(db, "admins", newUserId), {
+                    name: name,
+                    email: email,
+                    role: "sub_admin", // تحديد كـ مساعد
+                    permissions: permissions,
+                    createdAt: new Date().toISOString()
+                });
+
+                showAlert('تم إضافة الحساب المساعد بنجاح!', 'success');
+                document.getElementById('addAdminForm').reset();
+                fetchAdmins(); // تحديث الجدول
+
+            } catch (error) {
+                console.error(error);
+                if (error.code === 'auth/email-already-in-use') {
+                    showAlert('هذا البريد الإلكتروني مسجل مسبقاً.');
+                } else if (error.code === 'auth/weak-password') {
+                    showAlert('كلمة المرور ضعيفة جداً. استخدم 6 أحرف على الأقل.');
+                } else {
+                    showAlert('حدث خطأ أثناء إنشاء الحساب.');
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'إنشاء الحساب <i class="fa-solid fa-check"></i>';
+            }
+        });
+    </script>
+</body>
+</html>

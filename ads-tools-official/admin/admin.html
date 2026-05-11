@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز القيادة | المنصة الرئيسية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin_shared.css">
+
+    <style>
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); z-index: 9999999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.4s ease;}
+        body.layout-ready #loader { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        .welcome-banner { background: linear-gradient(135deg, var(--primary-color), #8b5cf6); border-radius: 16px; padding: 30px; color: white; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);}
+        .welcome-text h1 { margin: 0 0 10px 0; font-size: 28px;}
+        .welcome-text p { margin: 0; font-size: 15px; opacity: 0.9;}
+
+        /* شبكة الإحصائيات (السيرفر) */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px;}
+        .stat-card { background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 16px; padding: 25px; display: flex; align-items: center; gap: 20px; transition: 0.3s;}
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);}
+        .stat-icon { width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white;}
+        .icon-cpu { background: #ef4444; }
+        .icon-ram { background: #3b82f6; }
+        .icon-uptime { background: #10b981; }
+        .stat-info h3 { margin: 0 0 5px 0; color: var(--text-sub); font-size: 14px;}
+        .stat-info .value { font-size: 24px; font-weight: bold; color: var(--text-main); margin: 0;}
+        
+        /* شريط التقدم */
+        .progress-bar-bg { background: #e2e8f0; height: 6px; border-radius: 10px; margin-top: 10px; overflow: hidden;}
+        .progress-bar-fill { height: 100%; border-radius: 10px; transition: width 0.5s ease;}
+
+        /* شبكة الوصول السريع */
+        .section-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: var(--text-main); display: flex; align-items: center; gap: 10px;}
+        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;}
+        .action-btn { background: var(--bg-container); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; text-align: center; cursor: pointer; text-decoration: none; color: var(--text-main); transition: 0.2s; font-weight: bold; display: flex; flex-direction: column; gap: 10px; align-items: center;}
+        .action-btn i { font-size: 30px; color: var(--primary-color);}
+        .action-btn:hover { border-color: var(--primary-color); background: #f0f9ff; color: var(--primary-color);}
+    </style>
+</head>
+<body>
+    
+    <div id="loader">
+        <i class="fa-solid fa-satellite-dish fa-beat-fade fa-3x" style="margin-bottom: 15px; color: var(--primary-color);"></i>
+        <h3 style="font-family: 'Cairo';">جاري الاتصال بمركز القيادة...</h3>
+    </div>
+    
+    <main class="main-wrapper" id="mainWrapper">
+        
+        <div class="welcome-banner">
+            <div class="welcome-text">
+                <h1 id="adminName">أهلاً بك أيها المدير،</h1>
+                <p>كل الأنظمة تعمل بكفاءة. هذه نظرة عامة على حالة سيرفرك ومنصتك اليوم.</p>
+            </div>
+            <i class="fa-solid fa-chart-line" style="font-size: 60px; opacity: 0.2;"></i>
+        </div>
+
+        <h3 class="section-title"><i class="fa-solid fa-server"></i> صحة الخادم (Live Stats)</h3>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon icon-ram"><i class="fa-solid fa-memory"></i></div>
+                <div class="stat-info" style="flex: 1;">
+                    <h3>استهلاك الذاكرة (RAM)</h3>
+                    <p class="value"><span id="ramUsage">0</span> / <span id="ramTotal">0</span> GB</p>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="ramBar" style="width: 0%; background: #3b82f6;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-cpu"><i class="fa-solid fa-microchip"></i></div>
+                <div class="stat-info" style="flex: 1;">
+                    <h3>ضغط المعالج (CPU)</h3>
+                    <p class="value" id="cpuUsage">0%</p>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="cpuBar" style="width: 0%; background: #ef4444;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-uptime"><i class="fa-solid fa-clock"></i></div>
+                <div class="stat-info">
+                    <h3>مدة التشغيل المتواصلة</h3>
+                    <p class="value" id="uptimeValue">0 يوم</p>
+                    <div style="font-size: 11px; color: #10b981; margin-top: 5px;"><i class="fa-solid fa-check-circle"></i> النظام مستقر</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-title" style="margin-top: 40px;"><i class="fa-solid fa-bolt"></i> الوصول السريع</h3>
+        <div class="quick-actions">
+            <a href="admin_tools.html" class="action-btn">
+                <i class="fa-solid fa-layer-group"></i>
+                إدارة الأدوات والسيو
+            </a>
+            <a href="#" onclick="openVSCode()" class="action-btn" style="border-color: #8b5cf6;">
+                <i class="fa-solid fa-code" style="color: #8b5cf6;"></i>
+                استوديو الأكواد السحابي
+            </a>
+            <a href="#" class="action-btn" style="opacity: 0.6; cursor: not-allowed;" title="قريباً">
+                <i class="fa-solid fa-rectangle-ad"></i>
+                مدير الإعلانات المركزي (قريباً)
+            </a>
+            <a href="#" class="action-btn" style="opacity: 0.6; cursor: not-allowed;" title="قريباً">
+                <i class="fa-solid fa-users"></i>
+                نظام المشتركين (قريباً)
+            </a>
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initAdminLayout } from './admin_shared.js'; 
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAgdxyNBFrwJuAnoVq6OmZKZZvRknFyVQ8",
+            authDomain: "date-tool-official.firebaseapp.com",
+            projectId: "date-tool-official",
+            storageBucket: "date-tool-official.firebasestorage.app",
+            messagingSenderId: "219114793241",
+            appId: "1:219114793241:web:ee933836c68f7e712fbd88"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const adminData = await initAdminLayout(auth, db, 'dashboard'); 
+                    document.getElementById('adminName').innerText = `أهلاً بك، ${adminData.name || 'أيها المدير'} 👋`;
+                    
+                    document.getElementById('loader').style.display = 'none';
+                    document.body.classList.add('layout-ready');
+                    
+                    // تشغيل قارئ نبض السيرفر
+                    fetchServerStats();
+                    setInterval(fetchServerStats, 5000); // تحديث كل 5 ثواني
+                    
+                } catch (error) { 
+                    document.getElementById('loader').innerHTML = `<h3 style="color:red;">حدث خطأ.</h3>`;
+                }
+            } else {
+                window.location.href = 'admin_login.html';
+            }
+        });
+
+        // دالة جلب إحصائيات السيرفر
+        async function fetchServerStats() {
+            try {
+                const res = await fetch('/api/server-stats');
+                if(!res.ok) return;
+                const data = await res.json();
+                if(data.success) {
+                    // تحديث الرام
+                    document.getElementById('ramUsage').innerText = data.memory.used;
+                    document.getElementById('ramTotal').innerText = data.memory.total;
+                    document.getElementById('ramBar').style.width = data.memory.percentage + '%';
+                    
+                    // تغيير لون الرام إذا زاد عن 80%
+                    if(data.memory.percentage > 80) document.getElementById('ramBar').style.background = '#ef4444';
+                    else document.getElementById('ramBar').style.background = '#3b82f6';
+
+                    // تحديث المعالج
+                    document.getElementById('cpuUsage').innerText = data.cpu.percentage + '%';
+                    document.getElementById('cpuBar').style.width = data.cpu.percentage + '%';
+
+                    // تحديث مدة التشغيل (تحويل الثواني إلى أيام وساعات)
+                    const d = Math.floor(data.uptime / (3600*24));
+                    const h = Math.floor(data.uptime % (3600*24) / 3600);
+                    document.getElementById('uptimeValue').innerText = `${d} يوم و ${h} ساعة`;
+                }
+            } catch(e) {}
+        }
+
+        window.openVSCode = () => { window.open(`http://${window.location.hostname}:8080`, '_blank'); };
+    </script>
+</body>
+</html>

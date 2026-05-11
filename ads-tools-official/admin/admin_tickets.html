@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة التذاكر | بوابة الإدارة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="admin_shared.css">
+</head>
+<body>
+
+    <main class="main-wrapper" id="mainWrapper">
+        
+        <h2 style="color: var(--text-main); margin-bottom: 20px; margin-top: 10px;"><i class="fa-solid fa-headset" style="color: var(--primary-color);"></i> إدارة تذاكر العملاء</h2>
+
+        <div class="filters-bar">
+            <div class="filter-group">
+                <label>بحث برقم التذكرة</label>
+                <input type="text" id="filterTicketNum" placeholder="date-xxxx" dir="ltr" style="text-align: right;">
+            </div>
+            <div class="filter-group">
+                <label>بحث بالبريد الإلكتروني للعميل</label>
+                <input type="text" id="filterEmail" placeholder="example@domain.com" dir="ltr" style="text-align: right;">
+            </div>
+            <div class="filter-group">
+                <label>حالة التذكرة</label>
+                <select id="filterStatus">
+                    <option value="الكل">جميع الحالات</option>
+                    <option value="جديدة">جديدة</option>
+                    <option value="قيد المعالجة">قيد المعالجة</option>
+                    <option value="مكتملة">مكتملة</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>تاريخ الإرسال</label>
+                <input type="date" id="filterDate">
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>رقم التذكرة</th>
+                        <th>العميل</th>
+                        <th style="max-width: 250px;">المشكلة</th>
+                        <th>التاريخ</th>
+                        <th>الحالة</th>
+                        <th>الموظف المستلم</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="ticketsTableBody">
+                    <tr><td colspan="7" style="text-align: center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin"></i> جاري جلب البيانات...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <div id="resolveModal" class="modal">
+        <div class="modal-content" style="border-top-color: var(--success-text);">
+            <h3><i class="fa-solid fa-check-double" style="color: var(--success-text);"></i> إنهاء التذكرة</h3>
+            <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 5px;">يرجى كتابة ملاحظة توضح كيف تم حل المشكلة لتكون مرجعاً للإدارة:</p>
+            <textarea id="resolutionNote" class="modal-textarea" placeholder="مثال: تم التواصل مع العميل وإعادة تفعيل حسابه بنجاح..."></textarea>
+            <input type="hidden" id="currentTicketIdToResolve">
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeResolveModal()">إلغاء</button>
+                <button class="btn-confirm" onclick="submitResolution()">حفظ وإغلاق التذكرة</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewMsgModal" class="modal">
+        <div class="modal-content">
+            <h3>تفاصيل المشكلة كاملة</h3>
+            <div id="fullMessageText" style="font-size: 14px; color: var(--text-main); line-height: 1.6; white-space: pre-wrap; max-height: 300px; overflow-y: auto; background: var(--bg-body); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);"></div>
+            <div id="resolutionTextSection" style="display:none; margin-top: 15px; padding-top:15px; border-top: 1px dashed var(--border-color);">
+                <strong style="color:var(--success-text); font-size:13px;">ملاحظات الحل:</strong>
+                <div id="fullResolutionText" style="font-size: 13px; color: var(--text-sub); margin-top: 5px;"></div>
+            </div>
+            <div class="modal-actions" style="justify-content: center;">
+                <button class="btn-cancel" onclick="document.getElementById('viewMsgModal').style.display='none'">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewAttachmentModal" class="modal">
+        <div class="modal-content" style="max-width: 700px; text-align: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: var(--text-main);"><i class="fa-solid fa-image" style="color: var(--primary-color);"></i> المرفق المرسل</h3>
+                <button onclick="document.getElementById('viewAttachmentModal').style.display='none'" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-sub);"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div style="background: var(--bg-body); border-radius: 8px; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; height: 400px; overflow: hidden; margin-bottom: 10px;">
+                <iframe id="attachedImagePreview" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+
+            <div class="modal-actions" style="justify-content: center; margin-top: 20px;">
+                <a id="downloadAttachmentBtn" href="" download target="_blank" class="btn-confirm" style="text-decoration: none; background: var(--primary-color);"><i class="fa-solid fa-download"></i> فتح / تحميل الصورة الأصلية</a>
+                <button class="btn-cancel" onclick="document.getElementById('viewAttachmentModal').style.display='none'">إغلاق النافذة</button>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="admin_tickets.js"></script>
+</body>
+</html>

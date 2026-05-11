@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدير إعدادات الأدوات | بوابة الإدارة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin_shared.css">
+    <style>
+        .file-actions-group { display: flex; gap: 8px; align-items: center; }
+        .location-select { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); font-family: inherit; font-size: 12px; outline: none; background: #f8fafc; color: var(--text-main); font-weight: bold;}
+        .location-select:focus { border-color: var(--primary-color); }
+        #unifiedEditorArea { font-family: 'Monaco', 'Consolas', monospace; font-size: 14px; background: #0f172a; color: #e2e8f0; padding: 15px; border-radius: 8px; width: 100%; box-sizing: border-box; resize: vertical; min-height: 450px; line-height: 1.6; border: 1px solid var(--border-color); outline: none; direction: ltr;}
+        #unifiedEditorArea:focus { border-color: var(--primary-color); }
+        .seo-input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); font-family: inherit; font-size: 14px; margin-bottom: 15px; box-sizing: border-box;}
+    </style>
+</head>
+<body>
+    <div id="loader">
+        <i class="fa-solid fa-shield-halved fa-beat-fade fa-3x" style="margin-bottom: 15px;"></i>
+        <h3 style="font-family: 'Cairo';">جاري التحقق من الصلاحيات...</h3>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+    
+    <main class="main-wrapper" id="mainWrapper">
+        <div id="viewToolsList">
+            <div class="top-actions">
+                <div>
+                    <h2 style="color: var(--text-main); margin: 0; font-size: 24px;"><i class="fa-solid fa-boxes-stacked"></i> إدارة مشاريع الأدوات</h2>
+                    <p style="color: var(--text-sub); font-size: 13px; margin-top: 5px;">اختر أداة لإدارتها أو قم بإنشاء مشروع جديد.</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-primary" onclick="document.getElementById('folderModal').style.display='flex'"><i class="fa-solid fa-folder-plus"></i> مشروع جديد</button>
+                </div>
+            </div>
+            <div id="itemsGrid" class="grid-container"></div>
+        </div>
+
+        <div id="viewToolDetail" style="display: none;">
+            <div class="top-actions" style="margin-bottom: 20px;">
+                <div>
+                    <h2 style="color: var(--text-main); margin: 0; font-size: 24px;"><i class="fa-solid fa-sliders"></i> لوحة تحكم: <span id="headerToolName" style="color:var(--primary-color);"></span></h2>
+                    <p style="color: var(--text-sub); font-size: 13px; margin-top: 5px; direction: ltr; text-align: right;" id="headerToolPath">/tools/...</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-vscode" onclick="openVSCode()"><i class="fa-solid fa-code"></i> فتح بـ VS Code</button>
+                    <button class="btn-primary" style="background: #eab308; color: #1e293b; border: 1px solid #ca8a04;" onclick="buildTool()" id="buildToolBtn"><i class="fa-solid fa-hammer"></i> بناء وتحديث الموقع</button>
+                    <button class="btn-secondary" onclick="goBackToList()"><i class="fa-solid fa-arrow-right"></i> عودة للأدوات</button>
+                </div>
+            </div>
+
+            <div class="dashboard-panel">
+                <div class="panel-header"><i class="fa-solid fa-globe"></i> الإعدادات العامة للمشروع</div>
+                <div class="panel-body">
+                    <div>
+                        <div style="display: flex; gap: 15px;">
+    <div class="form-group" style="flex: 1;">
+        <label>اسم المشروع (الاسم التجاري)</label>
+        <input type="text" id="globalToolName" placeholder="مثال: أدوات التاريخ الشاملة">
+    </div>
+    <div class="form-group" style="flex: 1;">
+        <label>الوصف القصير (السلوقن تحت الشعار)</label>
+        <input type="text" id="globalToolSlogan" placeholder="مثال: دقة وسهولة في حساب التاريخ">
+    </div>
+    <div class="form-group" style="flex: 1;">
+        <label>نص حقوق النشر (الفوتر)</label>
+        <input type="text" id="globalCopyright" placeholder="مثال: جميع الحقوق محفوظة">
+    </div>
+</div>
+                        <div style="display: flex; gap: 15px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label>شعار المشروع (Logo)</label>
+                                <input type="file" id="logoUploadInput" accept="image/*" style="display:none;" onchange="previewUploadedLogo(event)">
+                                <div id="customUploadBox" class="custom-file-upload" onclick="document.getElementById('logoUploadInput').click()">
+                                    <div class="upload-placeholder"><i class="fa-solid fa-image"></i><span id="uploadLabelText">اختيار صورة</span></div>
+                                    <img id="previewLogo" src="" alt="Logo" style="display:none; max-height: 50px;">
+                                </div>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>أيقونة المتصفح (Favicon)</label>
+                                <input type="file" id="faviconUploadInput" accept="image/*" style="display:none;" onchange="previewUploadedFavicon(event)">
+                                <div id="customUploadBoxFavicon" class="custom-file-upload" onclick="document.getElementById('faviconUploadInput').click()">
+                                    <div class="upload-placeholder"><i class="fa-brands fa-chrome"></i><span id="uploadLabelTextFavicon">اختيار أيقونة</span></div>
+                                    <img id="previewFavicon" src="" alt="Favicon" style="display:none; max-height: 50px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <label>إيميل التواصل (لصفحة اتصل بنا)</label>
+                            <input type="email" id="globalContactEmail" placeholder="info@domain.com" style="direction: ltr;">
+                        </div>
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label>الدومين المرتبط بالمشروع</label>
+                            <input type="text" id="globalDomain" placeholder="https://my-tool.com" style="direction: ltr;">
+                        </div>
+                        <div style="text-align: left; margin-top: 15px;">
+                            <button class="btn-primary" id="saveGlobalBtn" onclick="saveGlobalSettings()"><i class="fa-solid fa-floppy-disk"></i> حفظ الإعدادات</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-panel">
+                <div class="panel-header" style="background: #eff6ff; color: #1e3a8a;">
+                    <div><i class="fa-solid fa-microchip"></i> ملفات النظام الأساسية (برمجة وتصميم)</div>
+                </div>
+                <div class="panel-body" style="grid-template-columns: 1fr; gap: 15px; padding: 20px;" id="systemFilesContainer">
+                </div>
+            </div>
+
+            <div class="dashboard-panel">
+                <div class="panel-header" style="justify-content: space-between; background: #f0fdf4; color: #166534;">
+                    <div><i class="fa-solid fa-file-lines"></i> صفحات المحتوى (ملفات حقيقية للسياسات، اتصل بنا، إلخ)</div>
+                    <button class="btn-primary" style="padding: 6px 12px; font-size: 12px; background: #16a34a;" onclick="document.getElementById('newPageModal').style.display='flex'"><i class="fa-solid fa-plus"></i> إضافة صفحة محتوى</button>
+                </div>
+                <div class="panel-body" style="grid-template-columns: 1fr; gap: 15px; padding: 20px;" id="customPagesContainer">
+                </div>
+            </div>
+
+            <div class="dashboard-panel">
+                <div class="panel-header" style="background: #fdf4ff; color: #86198f;">
+                    <div><i class="fa-solid fa-magnifying-glass"></i> إعدادات محركات البحث (SEO) والتاقات للأداة</div>
+                </div>
+                <div class="panel-body" style="grid-template-columns: 1fr; gap: 20px; padding: 20px;">
+                    <div>
+                        <label style="display:block; margin-bottom:5px; font-weight:bold;">عنوان الأداة (Meta Title)</label>
+                        <input type="text" id="mainSeoTitle" class="seo-input" placeholder="مثال: أفضل أداة لتحويل التاريخ">
+                        
+                        <label style="display:block; margin-bottom:5px; font-weight:bold;">وصف الأداة (Meta Description)</label>
+                        <textarea id="mainSeoDesc" class="seo-input" rows="3" placeholder="اكتب وصفاً جذاباً يظهر في جوجل..."></textarea>
+                        
+                        <label style="display:block; margin-bottom:5px; font-weight:bold;">الكلمات المفتاحية (Keywords)</label>
+                        <input type="text" id="mainSeoKeywords" class="seo-input" placeholder="تاريخ, تحويل, هجري, ميلادي">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:5px; font-weight:bold; color:#d97706;"><i class="fa-solid fa-code"></i> أكواد الهيدر العامة (Adsense, Analytics, Pixels)</label>
+                        <textarea id="mainSeoScripts" class="seo-input" rows="7" style="direction:ltr; font-family:monospace;" placeholder=""></textarea>
+                        
+                        <div style="text-align: left; margin-top: 15px;">
+                            <button class="btn-primary" id="saveSeoBtn" onclick="saveMainSeoSettings()" style="background: #c026d3;"><i class="fa-solid fa-floppy-disk"></i> حفظ إعدادات الـ SEO</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="folderModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <h3 style="margin-top: 0;"><i class="fa-solid fa-folder-plus"></i> مشروع أداة جديد</h3>
+            <div class="form-group">
+                <label>الاسم البرمجي (بالإنجليزي - مسار المجلد)</label>
+                <input type="text" id="folderSystemName" placeholder="مثال: date_tools" style="direction: ltr;">
+            </div>
+            <div style="display: flex; gap:10px; margin-top: 20px; justify-content: flex-end;">
+                <button class="btn-secondary" onclick="document.getElementById('folderModal').style.display='none'">إلغاء</button>
+                <button class="btn-primary" onclick="createFolder()">إنشاء الأداة</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="newPageModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <h3 style="margin-top: 0; color: #166534;"><i class="fa-solid fa-file-circle-plus"></i> إضافة صفحة محتوى</h3>
+            <div class="form-group">
+                <label>اسم الصفحة (توضيحي)</label>
+                <input type="text" id="newPageTitle" placeholder="مثال: سياسة الخصوصية">
+            </div>
+            <div class="form-group">
+                <label>الرابط (Slug باللغة الإنجليزية)</label>
+                <input type="text" id="newPageSlug" placeholder="مثال: privacy" style="direction: ltr;">
+            </div>
+            <div class="form-group">
+                <label>مكان العرض الافتراضي</label>
+                <select id="newPageLocation" class="seo-input" style="margin-bottom:0;">
+                    <option value="footer">في الفوتر (أسفل الصفحة)</option>
+                    <option value="header">في الهيدر (أعلى الصفحة)</option>
+                    <option value="both">في الهيدر والفوتر</option>
+                    <option value="hidden">مخفية (لا تعرض في القوائم)</option>
+                </select>
+            </div>
+            <div style="display: flex; gap:10px; margin-top: 20px; justify-content: flex-end;">
+                <button class="btn-secondary" onclick="document.getElementById('newPageModal').style.display='none'">إلغاء</button>
+                <button class="btn-primary" style="background:#16a34a;" onclick="createNewPage()">إنشاء الملف</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editorModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: var(--primary-color);"><i class="fa-solid fa-pen-nib"></i> تعديل: <span id="modalEditorTitle" style="color: #0f172a;" dir="ltr"></span></h3>
+                <span id="editorBadge" style="font-size: 12px; background: #e2e8f0; padding: 4px 10px; border-radius: 20px; color: #475569; font-weight: bold;">محرر الأكواد</span>
+            </div>
+            
+            <textarea id="unifiedEditorArea" spellcheck="false"></textarea>
+            
+            <div style="display: flex; gap:10px; margin-top: 20px; justify-content: flex-end;">
+                <button class="btn-secondary" onclick="document.getElementById('editorModal').style.display='none'">إغلاق</button>
+                <button class="btn-primary" id="saveEditorBtn" onclick="saveEditorContent()"><i class="fa-solid fa-floppy-disk"></i> حفظ الملف</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin_tools.js"></script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initAdminLayout } from './admin_shared.js'; 
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAgdxyNBFrwJuAnoVq6OmZKZZvRknFyVQ8",
+            authDomain: "date-tool-official.firebaseapp.com",
+            projectId: "date-tool-official",
+            storageBucket: "date-tool-official.firebasestorage.app",
+            messagingSenderId: "219114793241",
+            appId: "1:219114793241:web:ee933836c68f7e712fbd88"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const adminData = await initAdminLayout(auth, db, 'tools'); 
+                    if (adminData.role !== 'super_admin' && !adminData.permissions?.manage_tools) {
+                        window.location.href = 'admin.html'; return;
+                    }
+                    document.getElementById('loader').style.display = 'none';
+                    document.body.classList.add('layout-ready');
+                    
+                    window.loadFolders(); 
+                } catch (error) { 
+                    document.getElementById('loader').innerHTML = `<h3 style="color:red;">حدث خطأ في النظام.</h3>`;
+                }
+            } else {
+                window.location.href = 'admin_login.html';
+            }
+        });
+    </script>
+</body>
+</html>

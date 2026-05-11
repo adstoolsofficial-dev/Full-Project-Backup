@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الإعلانات | بوابة الإدارة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="admin_shared.css">
+
+    <style>
+        .filters-bar { background: var(--bg-container); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.02);}
+        .filter-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 200px;}
+        .filter-group label { font-size: 12px; color: var(--text-sub); font-weight: bold;}
+        .filter-group input, .filter-group select { padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-family: 'Cairo'; font-size: 13px; background: var(--bg-body); color: var(--text-main); outline: none;}
+        .filter-group input:focus, .filter-group select:focus { border-color: var(--primary-color);}
+        
+        .btn-add-ad { padding: 12px 25px; background: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2); }
+        .btn-add-ad:hover { transform: scale(1.05); background: var(--primary-hover); box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4); }
+
+        .table-container { background: var(--bg-container); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow-x: auto; margin-bottom: 40px; }
+        table { width: 100%; border-collapse: collapse; text-align: right; min-width: 1050px; }
+        th { background-color: var(--bg-body); color: var(--text-sub); padding: 15px; font-size: 14px; font-weight: 700; border-bottom: 2px solid var(--border-color); white-space: nowrap; }
+        td { padding: 15px; border-bottom: 1px solid var(--border-color); color: var(--text-main); font-size: 14px; vertical-align: middle; }
+        tr:hover { background-color: rgba(0,0,0,0.02); }
+        
+        /* شارات الحالة */
+        .status { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-block; text-align: center; white-space: nowrap; }
+        .status-active { background-color: #dcfce7; color: #166534; }
+        .status-pending { background-color: #fef9c3; color: #854d0e; }
+        .status-ended { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .status-rejected { background-color: #fee2e2; color: #991b1b; }
+        .status-paused { background-color: #fff7ed; color: #ea580c; border: 1px solid #fdba74; }
+        .status-modified { background-color: #fef08a; color: #854d0e; border: 1px solid #fde047; }
+
+        body.dark-mode .status-active { background-color: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid #166534;}
+        body.dark-mode .status-pending { background-color: rgba(202, 138, 4, 0.15); color: #facc15; border: 1px solid #ca8a04;}
+        body.dark-mode .status-rejected { background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid #991b1b;}
+        body.dark-mode .status-ended { background-color: rgba(71, 85, 105, 0.15); color: #cbd5e1; border: 1px solid #475569;}
+        body.dark-mode .status-paused { background-color: rgba(234, 88, 12, 0.15); color: #fb923c; border-color: #ea580c; }
+        body.dark-mode .status-modified { background-color: rgba(202, 138, 4, 0.15); color: #fde047; border-color: #ca8a04; }
+
+        /* أزرار الإجراءات الأيقونية المربعة */
+        .action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+        .btn-icon { width: 34px; height: 34px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; font-size: 14px; transition: 0.2s; outline: none; }
+        
+        .btn-view { background: #eff6ff; color: #3b82f6; } .btn-view:hover { background: #dbeafe; }
+        .btn-approve { background: #dcfce7; color: #166534; } .btn-approve:hover { background: #bbf7d0; }
+        .btn-edit { background: #fefce8; color: #ca8a04; } .btn-edit:hover { background: #fef08a; }
+        .btn-pause-action { background: #fff7ed; color: #ea580c; } .btn-pause-action:hover { background: #ffedd5; }
+        .btn-reject { background: #fef2f2; color: #dc2626; } .btn-reject:hover { background: #fee2e2; }
+        .btn-copy { background: #f3f4f6; color: #4b5563; } .btn-copy:hover { background: #e5e7eb; }
+        .btn-delete { background: #fef2f2; color: #dc2626; } .btn-delete:hover { background: #fee2e2; }
+
+        body.dark-mode .btn-view { background: rgba(59, 130, 246, 0.15); } body.dark-mode .btn-view:hover { background: rgba(59, 130, 246, 0.3); }
+        body.dark-mode .btn-approve { background: rgba(34, 197, 94, 0.15); color: #4ade80; } body.dark-mode .btn-approve:hover { background: rgba(34, 197, 94, 0.3); }
+        body.dark-mode .btn-edit { background: rgba(202, 138, 4, 0.15); color: #facc15; } body.dark-mode .btn-edit:hover { background: rgba(202, 138, 4, 0.3); }
+        body.dark-mode .btn-pause-action { background: rgba(249, 115, 22, 0.15); color: #fb923c; } body.dark-mode .btn-pause-action:hover { background: rgba(249, 115, 22, 0.3); }
+        body.dark-mode .btn-reject { background: rgba(239, 68, 68, 0.15); color: #f87171; } body.dark-mode .btn-reject:hover { background: rgba(239, 68, 68, 0.3); }
+        body.dark-mode .btn-copy { background: rgba(107, 114, 128, 0.15); color: #9ca3af; } body.dark-mode .btn-copy:hover { background: rgba(107, 114, 128, 0.3); }
+        body.dark-mode .btn-delete { background: rgba(239, 68, 68, 0.15); color: #f87171; } body.dark-mode .btn-delete:hover { background: rgba(239, 68, 68, 0.3); }
+
+        /* ستايل النوافذ */
+        .modal { display: none; position: fixed; z-index: 100000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-content { background-color: var(--bg-container); padding: 30px; border-radius: 16px; width: 90%; max-width: 450px; text-align: right; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); border-top: 5px solid var(--primary-color); max-height: 90vh; overflow-y: auto;}
+        .modal-content h3 { margin-top: 0; color: var(--text-main); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;}
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: bold; color: var(--text-sub); }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; font-family: 'Cairo'; font-size: 14px; background: var(--bg-body); color: var(--text-main); }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-color); }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 15px;}
+        .btn-cancel { background: var(--bg-body); color: var(--text-sub); border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight:bold;}
+        .btn-confirm { background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight:bold;}
+        .btn-confirm:hover { filter: brightness(0.9); }
+    </style>
+</head>
+<body>
+    <div id="loader">
+        <i class="fa-solid fa-shield-halved fa-beat-fade fa-3x" style="margin-bottom: 15px;"></i>
+        <h3 style="font-family: 'Cairo'; color: var(--text-main);">جاري التحقق من الصلاحيات...</h3>
+    </div>
+    
+    <main class="main-wrapper" id="mainWrapper">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; margin-top: 10px; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h2 style="color: var(--text-main); margin: 0; font-size: 24px;"><i class="fa-solid fa-bullhorn" style="color: var(--primary-color);"></i> إدارة الحملات الإعلانية</h2>
+                <span style="color: var(--text-sub); font-size: 14px;">متابعة الطلبات، الإحصائيات، وحالة الإعلانات المخصصة</span>
+            </div>
+            <button class="btn-add-ad" onclick="openCreateCopyModal()">
+                <i class="fa-solid fa-plus"></i> إضافة إعلان جديد
+            </button>
+        </div>
+
+        <div class="filters-bar">
+            <div class="filter-group">
+                <label>بحث برقم الإعلان أو اسم الحملة</label>
+                <input type="text" id="searchInput" placeholder="أدخل رقم الإعلان أو الاسم...">
+            </div>
+            <div class="filter-group">
+                <label>اسم أو رقم مضيف الإعلان</label>
+                <input type="text" id="adderSearchInput" placeholder="ابحث هنا...">
+            </div>
+            <div class="filter-group">
+                <label>تاريخ البدء أو الانتهاء</label>
+                <input type="date" id="dateFilter">
+            </div>
+            <div class="filter-group">
+                <label>حالة الإعلان</label>
+                <select id="statusFilter">
+                    <option value="all">جميع الحالات</option>
+                    <option value="قيد المراجعة">قيد المراجعة</option>
+                    <option value="نشط">نشط (منشور)</option>
+                    <option value="متوقف مؤقتاً">متوقف مؤقتاً</option>
+                    <option value="تم تعديله">تم تعديله</option>
+                    <option value="مرفوض">مرفوض</option>
+                    <option value="منتهي">منتهي</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>جهة وتفاصيل الإعلان</th>
+                        <th>تاريخ ووقت العرض</th>
+                        <th>المدة</th>
+                        <th>الزيارات (أثناء العرض)</th>
+                        <th>النقرات</th>
+                        <th>الحالة</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="adsTableBody">
+                    <tr><td colspan="7" style="text-align: center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin"></i> جاري جلب البيانات...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="createCopyModal" class="modal">
+        <div class="modal-content" style="max-width: 600px; border-top-color: var(--primary-color);">
+            <h3 id="createCopyTitle"><i class="fa-solid fa-plus"></i> إنشاء إعلان جديد</h3>
+            <input type="hidden" id="ccAdId">
+            
+            <div style="background: var(--bg-body); padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; color: var(--text-main); font-size: 15px;">
+                رقم الإعلان: <span id="ccDisplayId" style="color: var(--primary-color);">---</span> &nbsp;|&nbsp; 
+                المدة المقدرة: <span id="ccDisplayDuration" style="color: #f59e0b;">يتم الحساب...</span>
+            </div>
+
+            <div class="form-group"><label>اسم الحملة الإعلانية</label><input type="text" id="ccName" placeholder="مثال: حملة تخفيضات الصيف"></div>
+            <div class="form-group"><label>رابط التوجيه (URL)</label><input type="url" id="ccUrl" placeholder="https://..."></div>
+            <div class="form-group"><label>رابط الوسائط المباشر (صورة/فيديو)</label><input type="url" id="ccMedia" placeholder="https://..."></div>
+            
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1;"><label>الأداة المستهدفة</label>
+                    <select id="ccTool">
+                        <option value="date_tool">أداة التاريخ والعمر</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;"><label>مكان العرض</label>
+                    <select id="ccLocation">
+                        <option value="top-banner">علوي</option>
+                        <option value="middle-banner">إعلان مميز (وسط)</option>
+                        <option value="bottom-banner-1">سفلي 1</option>
+                        <option value="bottom-banner-2">سفلي 2</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1;"><label>وقت وتاريخ البدء</label><input type="datetime-local" id="ccStart" onchange="window.calculateCCDuration()"></div>
+                <div class="form-group" style="flex: 1;"><label>وقت وتاريخ الانتهاء</label><input type="datetime-local" id="ccEnd" onchange="window.calculateCCDuration()"></div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="document.getElementById('createCopyModal').style.display='none'">إلغاء</button>
+                <button class="btn-confirm" onclick="submitCreateCopy()"><i class="fa-solid fa-cloud-arrow-up"></i> رفع ونشر الإعلان</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content" style="border-top-color: #ca8a04;">
+            <h3><i class="fa-solid fa-pen-to-square" style="color: #ca8a04;"></i> تعديل تفاصيل الإعلان</h3>
+            <input type="hidden" id="editDocId">
+            <div class="form-group"><label>اسم الحملة</label><input type="text" id="editName"></div>
+            <div class="form-group"><label>الرابط المستهدف</label><input type="url" id="editUrl"></div>
+            <div class="form-group"><label>رابط الوسائط</label><input type="url" id="editMedia"></div>
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1;"><label>تاريخ البدء</label><input type="datetime-local" id="editStart"></div>
+                <div class="form-group" style="flex: 1;"><label>تاريخ الانتهاء</label><input type="datetime-local" id="editEnd"></div>
+            </div>
+            <div class="form-group"><label>سبب التعديل (سيظهر للمعلن)</label><input type="text" id="editReason" placeholder="مثال: تم تعديل الوقت ليناسب جدول النشر..."></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="document.getElementById('editModal').style.display='none'">إلغاء</button>
+                <button class="btn-confirm" style="background-color: #ca8a04;" onclick="submitEdit()">حفظ التعديلات</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="rejectModal" class="modal">
+        <div class="modal-content" style="border-top-color: #ef4444;">
+            <h3><i class="fa-solid fa-ban" style="color: #ef4444;"></i> رفض الإعلان</h3>
+            <input type="hidden" id="rejectDocId">
+            <div class="form-group"><label>الرجاء كتابة سبب الرفض (سيظهر للمعلن):</label><input type="text" id="rejectReasonInput" placeholder="مثال: الصورة غير واضحة، مخالف للشروط..."></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="document.getElementById('rejectModal').style.display='none'">إلغاء</button>
+                <button class="btn-confirm" style="background-color: #ef4444;" onclick="submitReject()">تأكيد الرفض</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pauseModal" class="modal">
+        <div class="modal-content" style="border-top-color: #f59e0b;">
+            <h3><i class="fa-solid fa-pause" style="color: #f59e0b;"></i> إيقاف مؤقت للإعلان</h3>
+            <input type="hidden" id="pauseDocId">
+            <div class="form-group"><label>الرجاء كتابة سبب الإيقاف (سيظهر للمعلن):</label><input type="text" id="pauseReasonInput" placeholder="مثال: يرجى تحديث الرابط..."></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="document.getElementById('pauseModal').style.display='none'">إلغاء</button>
+                <button class="btn-confirm" style="background-color: #f59e0b;" onclick="submitPause()">تأكيد الإيقاف</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewAdModal" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <h3 style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;"><i class="fa-solid fa-circle-info" style="color: var(--primary-color);"></i> تفاصيل الإعلان</h3>
+            <div id="adDetailsContent" style="text-align: right; line-height: 1.8; color: var(--text-main); font-size: 14px;"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="document.getElementById('viewAdModal').style.display='none'">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mediaModal" class="modal">
+        <div class="modal-content" style="max-width: 700px; text-align: center; background: transparent; box-shadow: none; border: none;">
+            <span onclick="document.getElementById('mediaModal').style.display='none'" style="position: absolute; top: 15px; right: 20px; font-size: 35px; cursor: pointer; color: white;">&times;</span>
+            <div id="mediaContainer"></div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h3 id="confirmTitle">تأكيد الإجراء</h3>
+            <p id="confirmMessage" style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;"></p>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="document.getElementById('confirmModal').style.display='none'">إلغاء</button>
+                <button class="btn-confirm" id="confirmActionBtn">تأكيد</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertModal" class="modal">
+        <div class="modal-content" style="text-align: center; max-width: 350px;">
+            <div id="alertIcon" style="font-size: 40px; margin-bottom: 15px;"></div>
+            <div id="alertMsg" style="margin-bottom: 20px; font-size: 15px;"></div>
+            <button class="btn-confirm" onclick="document.getElementById('alertModal').style.display='none'" style="width: 100%;">حسناً</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initAdminLayout } from './admin_shared.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAgdxyNBFrwJuAnoVq6OmZKZZvRknFyVQ8",
+            authDomain: "date-tool-official.firebaseapp.com",
+            projectId: "date-tool-official",
+            storageBucket: "date-tool-official.firebasestorage.app",
+            messagingSenderId: "219114793241",
+            appId: "1:219114793241:web:ee933836c68f7e712fbd88",
+            measurementId: "G-ZKCJC1Y7X7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let allCampaigns = [];
+        let currentAdminInfo = { name: 'غير معروف', role: 'موظف', uid: '' };
+
+        const toolNamesAr = { 'date_tool': 'أداة التاريخ والعمر' };
+        const locNamesAr = { 'top-banner': 'علوي', 'middle-banner': 'إعلان مميز (وسط)', 'bottom-banner-1': 'سفلي 1', 'bottom-banner-2': 'سفلي 2' };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const adminData = await initAdminLayout(auth, db, 'ads'); 
+                    let hasAccess = false;
+                    if (adminData.role === 'super_admin' || adminData.permissions?.manage_ads) hasAccess = true;
+                    if (!hasAccess) { window.location.href = 'admin.html'; return; }
+
+                    currentAdminInfo.name = adminData.name || 'مدير النظام';
+                    currentAdminInfo.role = adminData.role === 'super_admin' ? 'مدير عام' : 'موظف';
+                    currentAdminInfo.uid = user.uid;
+
+                    fetchCampaigns();
+                } catch (error) { console.log(error); }
+            } else { window.location.href = 'admin_login.html'; }
+        });
+
+        // دوال التنبيهات والواجهة
+        window.showCustomAlert = (msg, isError = false) => {
+            const modal = document.getElementById('alertModal');
+            document.getElementById('alertMsg').innerHTML = msg; 
+            document.getElementById('alertIcon').innerHTML = isError ? 
+                '<i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i>' : 
+                '<i class="fa-solid fa-circle-check" style="color: #22c55e;"></i>';
+            modal.style.display = 'flex';
+        };
+
+        window.showCustomConfirm = (msg, onConfirm) => {
+            const modal = document.getElementById('confirmModal');
+            document.getElementById('confirmMessage').innerText = msg;
+            const confirmBtn = document.getElementById('confirmActionBtn');
+            const newBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+            newBtn.addEventListener('click', () => { modal.style.display = 'none'; onConfirm(); });
+            modal.style.display = 'flex';
+        };
+
+        window.openMedia = (src, isVideo) => {
+            const container = document.getElementById('mediaContainer');
+            if(isVideo) container.innerHTML = `<video src="${src}" controls autoplay style="max-width: 100%; border-radius: 12px; max-height: 80vh;"></video>`;
+            else container.innerHTML = `<img src="${src}" style="max-width: 100%; border-radius: 12px; max-height: 80vh;">`;
+            document.getElementById('mediaModal').style.display = 'flex';
+        };
+
+        // 🌟 حساب مدة الإعلان ديناميكياً
+        window.calculateCCDuration = () => {
+            const start = document.getElementById('ccStart').value;
+            const end = document.getElementById('ccEnd').value;
+            const display = document.getElementById('ccDisplayDuration');
+            
+            if(start && end) {
+                const sDate = new Date(start);
+                const eDate = new Date(end);
+                if (eDate <= sDate) {
+                    display.innerHTML = '<span style="color:#ef4444;">تاريخ غير صالح</span>';
+                    return 0;
+                }
+                const diff = Math.abs(eDate - sDate);
+                const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                display.innerHTML = days + " يوم";
+                return days;
+            }
+            display.innerHTML = "يتم الحساب...";
+            return 0;
+        };
+
+        // 🌟 فتح نافذة الإنشاء / النسخ
+        window.openCreateCopyModal = (docId = null) => {
+            const randomId = Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('ccDisplayId').innerText = "#" + randomId;
+            document.getElementById('ccAdId').value = randomId;
+            
+            if(docId) { // وضع النسخ
+                const camp = allCampaigns.find(c => c.id === docId);
+                document.getElementById('createCopyTitle').innerHTML = '<i class="fa-solid fa-copy"></i> نسخ الإعلان كجديد';
+                document.getElementById('ccName').value = camp.campaignName + " (نسخة)";
+                document.getElementById('ccUrl').value = camp.targetUrl || '';
+                document.getElementById('ccMedia').value = camp.imageUrl || '';
+                document.getElementById('ccTool').value = camp.targetTool || 'date_tool';
+                document.getElementById('ccLocation').value = camp.targetLocation || 'top-banner';
+                document.getElementById('ccStart').value = '';
+                document.getElementById('ccEnd').value = '';
+            } else { // وضع الإنشاء
+                document.getElementById('createCopyTitle').innerHTML = '<i class="fa-solid fa-plus"></i> إنشاء إعلان جديد';
+                document.getElementById('ccName').value = '';
+                document.getElementById('ccUrl').value = '';
+                document.getElementById('ccMedia').value = '';
+                document.getElementById('ccStart').value = '';
+                document.getElementById('ccEnd').value = '';
+            }
+            window.calculateCCDuration();
+            document.getElementById('createCopyModal').style.display = 'flex';
+        };
+
+        // 🌟 إرسال الرفع للإنشاء/النسخ + رسالة الترحيب والشكر
+        window.submitCreateCopy = async () => {
+            const start = document.getElementById('ccStart').value;
+            const end = document.getElementById('ccEnd').value;
+            const name = document.getElementById('ccName').value;
+            const url = document.getElementById('ccUrl').value;
+            const media = document.getElementById('ccMedia').value;
+            
+            if(!name || !start || !end || !media) {
+                showCustomAlert('يرجى تعبئة جميع الحقول المطلوبة.', true); return;
+            }
+            
+            const days = window.calculateCCDuration();
+            if (days <= 0) { showCustomAlert('تأكد من أن تاريخ الانتهاء بعد تاريخ البدء.', true); return; }
+
+            const adId = document.getElementById('ccAdId').value;
+            
+            try {
+                await addDoc(collection(db, "campaigns"), {
+                    campaignId: Number(adId),
+                    campaignName: name,
+                    targetUrl: url,
+                    imageUrl: media,
+                    mediaType: media.includes('.mp4') ? 'video' : 'image',
+                    targetTool: document.getElementById('ccTool').value,
+                    targetLocation: document.getElementById('ccLocation').value,
+                    startTime: start,
+                    endTime: end,
+                    status: "قيد المراجعة",
+                    views: 0,
+                    clicks: 0,
+                    addedByType: currentAdminInfo.role,
+                    addedByName: currentAdminInfo.name,
+                    addedById: currentAdminInfo.uid
+                });
+                
+                document.getElementById('createCopyModal').style.display = 'none';
+                
+                showCustomAlert(`
+                    <div style="font-size: 14px; line-height: 1.8; text-align: right;">
+                        <div style="font-size: 18px; font-weight: bold; color: #22c55e; margin-bottom: 10px; text-align: center;">تم الرفع بنجاح!</div>
+                        رقم الإعلان: <strong style="color: var(--primary-color);">#${adId}</strong><br>
+                        المدة الزمنية: <strong style="color: #f59e0b;">${days} يوم</strong><br>
+                        الحالة: <strong style="color: #64748b;">في انتظار الموافقة</strong><br>
+                        <hr style="border:0; border-top:1px dashed var(--border-color); margin: 10px 0;">
+                        <div style="font-size: 13px; color: var(--text-sub); text-align: center;">نشكر لك جهودك ووقتك! 🌹<br>تم استلام طلبك وبانتظار المراجعة للنشر.</div>
+                    </div>
+                `, false);
+                
+                fetchCampaigns();
+            } catch (error) { showCustomAlert('حدث خطأ أثناء الرفع: ' + error.message, true); }
+        };
+
+        // النوافذ الأخرى (تعديل، إيقاف، رفض)
+        window.openEditModal = (docId) => {
+            const camp = allCampaigns.find(c => c.id === docId);
+            if(camp) {
+                document.getElementById('editDocId').value = docId;
+                document.getElementById('editName').value = camp.campaignName || '';
+                document.getElementById('editUrl').value = camp.targetUrl || '';
+                document.getElementById('editMedia').value = camp.imageUrl || '';
+                document.getElementById('editStart').value = camp.startTime || '';
+                document.getElementById('editEnd').value = camp.endTime || '';
+                document.getElementById('editReason').value = camp.editReason || ''; 
+                document.getElementById('editModal').style.display = 'flex';
+            }
+        };
+        window.submitEdit = async () => {
+            const docId = document.getElementById('editDocId').value;
+            try {
+                await updateDoc(doc(db, "campaigns", docId), {
+                    campaignName: document.getElementById('editName').value,
+                    targetUrl: document.getElementById('editUrl').value,
+                    imageUrl: document.getElementById('editMedia').value,
+                    mediaType: document.getElementById('editMedia').value.includes('.mp4') ? 'video' : 'image',
+                    startTime: document.getElementById('editStart').value,
+                    endTime: document.getElementById('editEnd').value,
+                    editReason: document.getElementById('editReason').value,
+                    status: 'تم تعديله'
+                });
+                document.getElementById('editModal').style.display = 'none';
+                showCustomAlert('تم التعديل! الإعلان بانتظار موافقة المعلن.', false);
+                fetchCampaigns();
+            } catch(error) { showCustomAlert("حدث خطأ: " + error.message, true); }
+        };
+
+        window.openRejectModal = (docId) => {
+            document.getElementById('rejectDocId').value = docId;
+            document.getElementById('rejectReasonInput').value = ''; 
+            document.getElementById('rejectModal').style.display = 'flex';
+        };
+        window.submitReject = async () => {
+            const docId = document.getElementById('rejectDocId').value;
+            const reason = document.getElementById('rejectReasonInput').value.trim();
+            if(!reason) { showCustomAlert('الرجاء كتابة سبب الرفض.', true); return; }
+            try {
+                await updateDoc(doc(db, "campaigns", docId), { status: 'مرفوض', rejectReason: reason });
+                document.getElementById('rejectModal').style.display = 'none';
+                showCustomAlert('تم رفض الإعلان بنجاح.');
+                fetchCampaigns();
+            } catch (error) { showCustomAlert('خطأ: ' + error.message, true); }
+        };
+
+        window.openPauseModal = (docId) => {
+            document.getElementById('pauseDocId').value = docId;
+            document.getElementById('pauseReasonInput').value = ''; 
+            document.getElementById('pauseModal').style.display = 'flex';
+        };
+        window.submitPause = async () => {
+            const docId = document.getElementById('pauseDocId').value;
+            const reason = document.getElementById('pauseReasonInput').value.trim();
+            if(!reason) { showCustomAlert('الرجاء كتابة سبب الإيقاف.', true); return; }
+            try {
+                await updateDoc(doc(db, "campaigns", docId), { status: 'متوقف مؤقتاً', pauseReason: reason });
+                document.getElementById('pauseModal').style.display = 'none';
+                showCustomAlert('تم إيقاف الإعلان مؤقتاً.');
+                fetchCampaigns();
+            } catch (error) { showCustomAlert('خطأ: ' + error.message, true); }
+        };
+
+        window.openViewModal = (docId) => {
+            const camp = allCampaigns.find(c => c.id === docId);
+            if (!camp) return;
+
+            const tName = toolNamesAr[camp.targetTool] || 'أداة التاريخ والعمر';
+            const lName = locNamesAr[camp.targetLocation] || 'غير محدد';
+            
+            const isVideo = camp.mediaType && camp.mediaType.includes('video');
+            const mediaHTML = isVideo ? `<video src="${camp.imageUrl}" controls style="max-width: 100%; border-radius: 8px; margin-top: 10px; max-height: 200px;"></video>` : `<img src="${camp.imageUrl || ''}" style="max-width: 100%; border-radius: 8px; margin-top: 10px; max-height: 200px; border: 1px solid var(--border-color); cursor: pointer;" onclick="openMedia('${camp.imageUrl || ''}', false)" onerror="this.style.display='none'">`;
+
+            let extraInfoHtml = '';
+            if(camp.status === 'مرفوض' && camp.rejectReason) extraInfoHtml = `<div style="margin-top: 15px; padding: 12px; background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; color: #ef4444;"><strong><i class="fa-solid fa-circle-exclamation"></i> سبب الرفض:</strong> <br> ${camp.rejectReason}</div>`;
+            else if(camp.status === 'متوقف مؤقتاً' && camp.pauseReason) extraInfoHtml = `<div style="margin-top: 15px; padding: 12px; background-color: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; border-radius: 8px; color: #f59e0b;"><strong><i class="fa-solid fa-pause"></i> سبب الإيقاف:</strong> <br> ${camp.pauseReason}</div>`;
+            else if(camp.status === 'تم تعديله' && camp.editReason) extraInfoHtml = `<div style="margin-top: 15px; padding: 12px; background-color: rgba(202, 138, 4, 0.1); border: 1px solid #ca8a04; border-radius: 8px; color: #ca8a04;"><strong><i class="fa-solid fa-pen"></i> سبب التعديل:</strong> <br> ${camp.editReason}</div>`;
+
+            document.getElementById('adDetailsContent').innerHTML = `
+                <div style="margin-bottom: 12px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px;"><strong><i class="fa-solid fa-user-pen" style="color:#64748b;"></i> مضاف بواسطة:</strong> ${camp.addedByName || '---'} (${camp.addedByType || 'عميل'})</div>
+                <div style="margin-bottom: 12px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px;"><strong><i class="fa-solid fa-wrench" style="color:#64748b;"></i> الأداة المستهدفة:</strong> ${tName}</div>
+                <div style="margin-bottom: 12px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px;"><strong><i class="fa-solid fa-map-pin" style="color:#ec4899;"></i> مكان العرض:</strong> ${lName}</div>
+                <div style="margin-bottom: 12px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px;"><strong><i class="fa-solid fa-link" style="color:#0ea5e9;"></i> رابط التوجيه:</strong> <br> <a href="${camp.targetUrl || '#'}" target="_blank" style="color: var(--primary-color); text-decoration: none; word-break: break-all; display: inline-block; margin-top: 5px;">${camp.targetUrl || 'لا يوجد'}</a></div>
+                <div style="margin-bottom: 12px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px;"><strong><i class="fa-solid fa-chart-simple" style="color:#f59e0b;"></i> الإحصائيات الحالية:</strong> ${camp.clicks || 0} نقرة / ${camp.views || 0} مشاهدة</div>
+                ${extraInfoHtml}
+                <div style="margin-top: 15px; text-align: center; background: var(--bg-body); padding: 15px; border-radius: 8px;"><strong style="display: block; margin-bottom: 5px;">الوسائط المرفقة (اضغط للتكبير):</strong>${mediaHTML}</div>
+            `;
+            document.getElementById('viewAdModal').style.display = 'flex';
+        };
+
+        // جلب البيانات وبناء الجدول
+        async function fetchCampaigns() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "campaigns"));
+                allCampaigns = [];
+                querySnapshot.forEach((doc) => { allCampaigns.push({ id: doc.id, ...doc.data() }); });
+                allCampaigns.sort((a, b) => (b.campaignId || 0) - (a.campaignId || 0));
+                applyFilters(); 
+            } catch (error) { document.getElementById('adsTableBody').innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">حدث خطأ أثناء جلب البيانات.</td></tr>`; }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('adsTableBody');
+            tbody.innerHTML = '';
+            if (data.length === 0) { tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-sub);">لا توجد إعلانات مطابقة لمعايير البحث.</td></tr>`; return; }
+
+            data.forEach(camp => {
+                let statusClass = 'status-pending';
+                let statusText = camp.status || 'قيد المراجعة';
+                
+                if(statusText === 'نشط') statusClass = 'status-active';
+                else if(statusText === 'منتهي') statusClass = 'status-ended';
+                else if(statusText === 'مرفوض') statusClass = 'status-rejected';
+                else if(statusText === 'متوقف مؤقتاً') statusClass = 'status-paused';
+                else if(statusText === 'تم تعديله') { statusClass = 'status-modified'; statusText = 'بانتظار المعلن'; }
+
+                let durationDays = "---";
+                if(camp.startTime && camp.endTime) {
+                    const diff = Math.abs(new Date(camp.endTime) - new Date(camp.startTime));
+                    durationDays = Math.ceil(diff / (1000 * 60 * 60 * 24)) + " يوم";
+                }
+
+                let startDay = '-', startTime = '-', endDay = '-', endTime = '-';
+                if (camp.startTime) { const p = camp.startTime.split('T'); startDay = p[0]; startTime = p[1] || '-'; }
+                if (camp.endTime) { const p = camp.endTime.split('T'); endDay = p[0]; endTime = p[1] || '-'; }
+
+                // 🌟 توليد أزرار الإجراءات الديناميكية
+                let actionsHTML = `<button class="btn-icon btn-view" title="التفاصيل السريعة" onclick="openViewModal('${camp.id}')"><i class="fa-solid fa-eye"></i></button>`;
+
+                if (camp.status === 'قيد المراجعة' || !camp.status) {
+                    actionsHTML += `<button class="btn-icon btn-approve" title="قبول ونشر مباشر" onclick="changeStatus('${camp.id}', 'نشط')"><i class="fa-solid fa-check"></i></button>`;
+                    actionsHTML += `<button class="btn-icon btn-edit" title="تعديل الإعلان" onclick="openEditModal('${camp.id}')"><i class="fa-solid fa-pen"></i></button>`;
+                    actionsHTML += `<button class="btn-icon btn-reject" title="رفض الإعلان" onclick="openRejectModal('${camp.id}')"><i class="fa-solid fa-ban"></i></button>`;
+                } 
+                else if (camp.status === 'نشط') {
+                    actionsHTML += `<button class="btn-icon btn-pause-action" title="إيقاف مؤقت" onclick="openPauseModal('${camp.id}')"><i class="fa-solid fa-pause"></i></button>`;
+                    actionsHTML += `<button class="btn-icon btn-edit" title="تعديل الإعلان" onclick="openEditModal('${camp.id}')"><i class="fa-solid fa-pen"></i></button>`;
+                } 
+                else if (camp.status === 'متوقف مؤقتاً') {
+                    actionsHTML += `<button class="btn-icon btn-approve" title="استئناف ونشر" onclick="changeStatus('${camp.id}', 'نشط')"><i class="fa-solid fa-play"></i></button>`;
+                    actionsHTML += `<button class="btn-icon btn-edit" title="تعديل الإعلان" onclick="openEditModal('${camp.id}')"><i class="fa-solid fa-pen"></i></button>`;
+                } 
+                else if (camp.status === 'مرفوض' || camp.status === 'تم تعديله') {
+                    actionsHTML += `<button class="btn-icon btn-edit" title="تعديل الإعلان" onclick="openEditModal('${camp.id}')"><i class="fa-solid fa-pen"></i></button>`;
+                }
+
+                actionsHTML += `<button class="btn-icon btn-copy" title="نسخ الإعلان وإعادة استخدامه" onclick="openCreateCopyModal('${camp.id}')"><i class="fa-solid fa-copy"></i></button>`;
+                actionsHTML += `<button class="btn-icon btn-delete" title="حذف نهائي" onclick="deleteAd('${camp.id}')"><i class="fa-solid fa-trash"></i></button>`;
+
+                const tName = toolNamesAr[camp.targetTool] || 'أداة التاريخ والعمر';
+                const lName = locNamesAr[camp.targetLocation] || 'غير محدد';
+                const isVideo = camp.mediaType && camp.mediaType.includes('video');
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="line-height: 1.6;">
+                        <strong style="color: var(--text-main); font-size: 15px;">${camp.campaignName || 'إعلان بدون اسم'}</strong>
+                        <div style="font-size: 11px; color: var(--text-sub); margin-top: 4px; font-weight: 600;">رقم: ${camp.campaignId || '---'} | ${tName} - ${lName}</div>
+                        <div style="margin-top: 6px; display: flex; gap: 10px; align-items: center;">
+                            <a href="javascript:void(0)" onclick="openMedia('${camp.imageUrl || ''}', ${isVideo})" style="font-size: 12px; color: var(--primary-color); text-decoration: none; font-weight: bold;"><i class="fa-solid fa-image"></i> المرفق</a>
+                            <span style="color: var(--border-color);">|</span>
+                            <a href="${camp.targetUrl || '#'}" target="_blank" style="font-size: 12px; color: var(--primary-color); text-decoration: none; font-weight: bold;"><i class="fa-solid fa-link"></i> الوجهة</a>
+                        </div>
+                    </td>
+                    <td style="font-size: 13px; line-height: 1.7;">
+                        <strong style="color: #22c55e;">من:</strong> ${startDay} <span style="color:var(--text-sub); font-size: 11px; margin-right: 5px;"><i class="fa-regular fa-clock"></i> ${startTime}</span>
+                        <hr style="border:0; border-top:1px dashed var(--border-color); margin: 6px 0;">
+                        <strong style="color: #ef4444;">إلى:</strong> ${endDay} <span style="color:var(--text-sub); font-size: 11px; margin-right: 5px;"><i class="fa-regular fa-clock"></i> ${endTime}</span>
+                    </td>
+                    <td style="font-weight: bold;">${durationDays}</td>
+                    <td style="font-weight: bold; font-size: 15px;">${camp.views || 0}</td>
+                    <td style="font-weight: bold; font-size: 15px;">${camp.clicks || 0}</td>
+                    <td><span class="status ${statusClass}">${statusText}</span></td>
+                    <td><div class="action-btns">${actionsHTML}</div></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        const applyFilters = () => {
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+            const adderVal = document.getElementById('adderSearchInput').value.toLowerCase().trim();
+            const dateVal = document.getElementById('dateFilter').value;
+            const statusVal = document.getElementById('statusFilter').value;
+
+            const filteredData = allCampaigns.filter(camp => {
+                const matchSearch = !searchVal || String(camp.campaignId || '').toLowerCase().includes(searchVal) || (camp.campaignName && camp.campaignName.toLowerCase().includes(searchVal));
+                const matchAdder = !adderVal || (camp.addedByName && camp.addedByName.toLowerCase().includes(adderVal)) || (camp.addedById && String(camp.addedById).toLowerCase().includes(adderVal));
+                const matchDate = !dateVal || (camp.startTime && camp.startTime.includes(dateVal)) || (camp.endTime && camp.endTime.includes(dateVal));
+                const matchStatus = statusVal === 'all' || camp.status === statusVal;
+
+                return matchSearch && matchAdder && matchDate && matchStatus;
+            });
+            renderTable(filteredData);
+        };
+
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('adderSearchInput').addEventListener('input', applyFilters);
+        document.getElementById('dateFilter').addEventListener('change', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+
+        window.changeStatus = (docId, newStatus) => {
+            window.showCustomConfirm(`هل أنت متأكد من تغيير حالة الإعلان إلى: ${newStatus}؟`, async () => {
+                try {
+                    await updateDoc(doc(db, "campaigns", docId), { status: newStatus });
+                    window.showCustomAlert('تم تغيير الحالة بنجاح.');
+                    fetchCampaigns();
+                } catch (error) { window.showCustomAlert('خطأ: ' + error.message, true); }
+            });
+        };
+
+        window.deleteAd = (docId) => {
+            window.showCustomConfirm("هل أنت متأكد تماماً من حذف هذا الإعلان نهائياً؟", async () => {
+                try {
+                    await deleteDoc(doc(db, "campaigns", docId));
+                    window.showCustomAlert('تم حذف الإعلان بنجاح.');
+                    fetchCampaigns();
+                } catch (error) { window.showCustomAlert('خطأ في الحذف: ' + error.message, true); }
+            });
+        };
+    </script>
+</body>
+</html>

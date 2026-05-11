@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الدعم الفني | Date Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+    <style>
+        /* المتغيرات اللونية (الوضع الفاتح) */
+        :root {
+            --bg-body: #f0f4f8;
+            --bg-container: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --border-color: #cbd5e1;
+            --input-bg: #ffffff;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --btn-disabled: #94a3b8;
+            --info-bg: #eff6ff;
+            --info-border: #bfdbfe;
+            --info-text: #1e40af;
+        }
+
+        /* المتغيرات اللونية (الوضع المظلم) */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                color-scheme: dark;
+                --bg-body: #0f172a;
+                --bg-container: #1e293b;
+                --text-main: #f8fafc;
+                --text-sub: #94a3b8;
+                --border-color: #334155;
+                --input-bg: #0f172a;
+                --info-bg: rgba(59, 130, 246, 0.1);
+                --info-border: #3b82f6;
+                --info-text: #60a5fa;
+            }
+        }
+
+        body { font-family: 'Cairo', sans-serif; margin: 0; background-color: var(--bg-body); display: flex; justify-content: center; align-items: center; min-height: 100vh; transition: background-color 0.3s; padding: 20px; box-sizing: border-box;}
+        .auth-container { background: var(--bg-container); padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 500px; text-align: center; border-top: 5px solid var(--primary-color); transition: background-color 0.3s; }
+        .auth-container h1 { color: var(--text-main); margin-bottom: 5px; font-size: 24px;}
+        
+        .welcome-msg { background-color: var(--info-bg); border: 1px dashed var(--info-border); color: var(--info-text); padding: 15px; border-radius: 8px; text-align: right; font-size: 13px; font-weight: 600; margin-bottom: 25px; line-height: 1.7; margin-top: 15px;}
+        .welcome-msg i { font-size: 18px; margin-left: 5px; color: var(--primary-color); }
+
+        .form-group { margin-bottom: 15px; text-align: right; position: relative;}
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main); font-size: 14px;}
+        .form-group input[type="text"], 
+        .form-group input[type="email"], 
+        .form-group textarea { width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-family: 'Cairo'; background-color: var(--input-bg); color: var(--text-main); transition: 0.3s; font-size: 14px;}
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        
+        .form-group textarea { resize: vertical; min-height: 100px; }
+
+        /* تنسيقات رسائل التلميح (Hints) */
+        .hint-text { font-size: 12px; margin-top: 6px; display: block; transition: 0.3s; line-height: 1.5; color: transparent; height: 0; overflow: hidden; }
+        .hint-error { color: #ef4444; font-weight: 600; height: auto; margin-top: 6px;}
+
+        /* تصميم حقل رفع الملفات */
+        .file-upload-wrapper { position: relative; width: 100%; height: 50px; border: 1px dashed var(--primary-color); border-radius: 8px; background-color: var(--input-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; overflow: hidden;}
+        .file-upload-wrapper:hover { background-color: var(--info-bg); }
+        .file-upload-wrapper input[type="file"] { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .file-upload-text { color: var(--text-sub); font-size: 13px; font-weight: 600; pointer-events: none; display: flex; align-items: center; gap: 8px;}
+        .file-upload-text i { color: var(--primary-color); font-size: 16px; }
+
+        .submit-btn { width: 100%; background-color: var(--primary-color); color: white; border: none; padding: 14px; font-weight: 700; font-size: 15px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-family: 'Cairo'; margin-top: 10px;}
+        .submit-btn:hover { background-color: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);}
+        .submit-btn:disabled { background-color: var(--btn-disabled); cursor: not-allowed; transform: none; box-shadow: none;}
+
+        /* نافذة التنبيهات للرسائل الناجحة أو أخطاء السيرفر فقط */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-content { background-color: var(--bg-container); padding: 35px 25px; border-radius: 16px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border-top: 5px solid var(--primary-color); animation: fadeIn 0.3s ease;}
+        .modal-content h3 { color: var(--text-main); margin: 20px 0; font-size: 16px; line-height: 1.6;}
+        .btn-alert-ok { background-color: var(--primary-color); color: white; border: none; padding: 10px 30px; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; transition: 0.3s; }
+        .btn-alert-ok:hover { background-color: var(--primary-hover); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <div style="font-size: 45px; color: var(--primary-color); margin-bottom: 10px;"><i class="fa-solid fa-headset"></i></div>
+        <h1>تواصل معنا</h1>
+
+        <div class="welcome-msg">
+            <i class="fa-solid fa-hand-holding-heart"></i> 
+            أهلاً بك عزيزي العميل. نعتذر جداً عن أي صعوبة واجهتك، نحن هنا لخدمتك وسنقوم بالرد عليك في أقرب وقت ممكن بإذن الله.<br><br>
+            <span style="color: #ef4444;"><i class="fa-solid fa-circle-exclamation" style="color: #ef4444; font-size: 14px;"></i> <b>ملاحظة هامة:</b></span> في حال ظهور رسالة خطأ لك، نرجو وصفها بشكل دقيق أو إرفاق لقطة شاشة (صورة) لها بالأسفل لتسريع مساعدتك.
+        </div>
+
+        <form id="supportForm" novalidate>
+            <div class="form-group">
+                <label>الاسم أو الجهة</label>
+                <input type="text" id="senderName" placeholder="أدخل اسمك الكريم">
+                <span class="hint-text" id="nameHint"></span>
+            </div>
+            
+            <div class="form-group">
+                <label>البريد الإلكتروني (للتواصل معك)</label>
+                <input type="email" id="senderEmail" placeholder="example@domain.com" dir="ltr" style="text-align: right;">
+                <span class="hint-text" id="emailHint"></span>
+            </div>
+
+            <div class="form-group">
+                <label>وصف المشكلة / الاستفسار</label>
+                <textarea id="messageContent" placeholder="يرجى كتابة تفاصيل المشكلة أو رسالة الخطأ هنا بدقة..."></textarea>
+                <span class="hint-text" id="msgHint"></span>
+            </div>
+
+            <div class="form-group">
+                <label>إرفاق صورة (اختياري)</label>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="errorImage" accept="image/png, image/jpeg, image/jpg" onchange="updateFileName(this)">
+                    <div class="file-upload-text" id="fileText">
+                        <i class="fa-regular fa-image"></i> اضغط هنا لاختيار صورة (JPG, PNG)
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-start; margin-bottom: 15px;">
+                <div class="g-recaptcha" data-sitekey="6LcGrIwsAAAAAP5f-fzzMMmHVZzqtpC2OhslCe_3" data-theme="light"></div>
+            </div>
+
+            <button type="submit" id="submitSupportBtn" class="submit-btn">إرسال الطلب <i class="fa-regular fa-paper-plane" style="margin-right: 5px;"></i></button>
+        </form>
+
+        <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center;">
+            <a href="login.html" style="color: var(--text-sub); text-decoration: none; font-size: 14px; font-weight: 600; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='var(--text-sub)'">
+                <i class="fa-solid fa-arrow-right" style="margin-left: 5px;"></i>العودة إلى صفحة تسجيل الدخول
+            </a>
+            <div style="margin-top: 15px; font-size: 12px; color: #94a3b8;">
+                جميع الحقوق محفوظة © بوابة المعلنين
+            </div>
+        </div>
+
+    </div>
+
+    <div id="customAlertModal" class="modal">
+        <div class="modal-content">
+            <div id="customAlertIcon" style="font-size: 55px; margin-bottom: 10px;"></div>
+            <h3 id="customAlertMessage"></h3>
+            <button class="btn-alert-ok" id="alertOkBtn" onclick="closeCustomAlert()">حسناً</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAgdxyNBFrwJuAnoVq6OmZKZZvRknFyVQ8",
+            authDomain: "date-tool-official.firebaseapp.com",
+            projectId: "date-tool-official",
+            storageBucket: "date-tool-official.firebasestorage.app",
+            messagingSenderId: "219114793241",
+            appId: "1:219114793241:web:ee933836c68f7e712fbd88",
+            measurementId: "G-ZKCJC1Y7X7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let alertCallback = null;
+
+        const nameInput = document.getElementById('senderName');
+        const emailInput = document.getElementById('senderEmail');
+        const msgInput = document.getElementById('messageContent');
+        const imageInput = document.getElementById('errorImage');
+        
+        const nameHint = document.getElementById('nameHint');
+        const emailHint = document.getElementById('emailHint');
+        const msgHint = document.getElementById('msgHint');
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        // دالة تغيير نص رفع الملف
+        window.updateFileName = function(input) {
+            const textElement = document.getElementById('fileText');
+            if (input.files && input.files.length > 0) {
+                const fileName = input.files[0].name;
+                textElement.innerHTML = `<i class="fa-solid fa-check" style="color:#22c55e;"></i> تم اختيار: ${fileName}`;
+                textElement.style.color = '#22c55e';
+            } else {
+                textElement.innerHTML = `<i class="fa-regular fa-image"></i> اضغط هنا لاختيار صورة (JPG, PNG)`;
+                textElement.style.color = 'var(--text-sub)';
+            }
+        }
+
+        // دالة إظهار النوافذ المنبثقة
+        window.showAlert = (msg, type = 'error', callback = null) => {
+            const modal = document.getElementById('customAlertModal');
+            const icon = document.getElementById('customAlertIcon');
+            const content = modal.querySelector('.modal-content');
+            alertCallback = callback;
+
+            if (type === 'success') {
+                icon.innerHTML = '<i class="fa-regular fa-circle-check" style="color: #22c55e;"></i>';
+                content.style.borderTopColor = '#22c55e';
+            } else {
+                icon.innerHTML = '<i class="fa-regular fa-circle-xmark" style="color: #ef4444;"></i>';
+                content.style.borderTopColor = '#ef4444';
+            }
+            document.getElementById('customAlertMessage').innerHTML = msg;
+            modal.style.display = 'flex';
+        };
+
+        window.closeCustomAlert = () => {
+            document.getElementById('customAlertModal').style.display = 'none';
+            if(alertCallback) alertCallback();
+        };
+
+        // دالة إرسال التذكرة لقاعدة البيانات
+        async function saveTicketToDatabase(name, email, message, fileUrl) {
+            const btn = document.getElementById('submitSupportBtn');
+            try {
+                // توليد رقم التذكرة العشوائي هنا date-xxxx
+                const randomNum = Math.floor(1000 + Math.random() * 9000);
+                const ticketNumber = `date-${randomNum}`;
+
+                await addDoc(collection(db, "support_tickets"), {
+                    ticketNumber: ticketNumber, // الإضافة الجديدة
+                    senderName: name,
+                    senderEmail: email,
+                    message: message,
+                    attachedImage: fileUrl || null,
+                    status: "جديدة",
+                    createdAt: serverTimestamp()
+                });
+
+                showAlert('تم استلام رسالتك بنجاح! شكراً لتواصلك معنا، سنقوم بالرد عليك في أقرب فرصة.', 'success', () => {
+                    document.getElementById('supportForm').reset();
+                    updateFileName(imageInput);
+                    grecaptcha.reset(); // 🛡️ إعادة تعيين الكابتشا بعد النجاح
+                    btn.disabled = false;
+                    btn.innerHTML = 'إرسال الطلب <i class="fa-regular fa-paper-plane" style="margin-right: 5px;"></i>';
+                });
+            } catch (error) {
+                btn.disabled = false;
+                btn.innerHTML = 'إرسال الطلب <i class="fa-regular fa-paper-plane" style="margin-right: 5px;"></i>';
+                showAlert('حدث خطأ غير متوقع أثناء حفظ الطلب. يرجى المحاولة لاحقاً.');
+                console.error("Error adding document: ", error);
+            }
+        }
+
+        // معالجة إرسال النموذج
+        document.getElementById('supportForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            const message = msgInput.value.trim();
+            const btn = document.getElementById('submitSupportBtn');
+            let isValid = true;
+
+            // إخفاء التحذيرات قبل الفحص
+            nameHint.className = 'hint-text'; nameHint.innerText = '';
+            emailHint.className = 'hint-text'; emailHint.innerText = '';
+            msgHint.className = 'hint-text'; msgHint.innerText = '';
+
+            // فحص البيانات وإظهار الرسائل المطلوبة أسفل الخانات
+            if (!name) {
+                nameHint.innerText = 'يرجى إدخال الاسم أو الجهة.';
+                nameHint.className = 'hint-text hint-error';
+                isValid = false;
+            }
+            if (!email) {
+                emailHint.innerText = 'يرجى إدخال البريد الإلكتروني.';
+                emailHint.className = 'hint-text hint-error';
+                isValid = false;
+            } else if (!emailRegex.test(email)) {
+                emailHint.innerText = 'صيغة البريد الإلكتروني غير صحيحة.';
+                emailHint.className = 'hint-text hint-error';
+                isValid = false;
+            }
+            if (message.length < 10) {
+                msgHint.innerText = 'يرجى كتابة تفاصيل واضحة للمشكلة (10 أحرف على الأقل).';
+                msgHint.className = 'hint-text hint-error';
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // 🛡️ التحقق من الكابتشا
+            const recaptchaResponse = grecaptcha.getResponse();
+            if (recaptchaResponse.length === 0) {
+                showAlert('الرجاء التأكد من أنك لست روبوتًا بتحديد مربع التحقق.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إرسال طلبك...';
+
+            // ========== ضع رابط سكربت جوجل الجديد هنا ==========
+            const googleScriptURL = "https://script.google.com/macros/s/AKfycbyaZbPfbjfM6LooHRVMkCvbuHwcIB9wRUnPjOwbb_HWKUICj4l2Tkt1kSnX5NLW_3W-1g/exec"; 
+            // ==========================================
+
+            let base64String = "";
+            let mimeType = "";
+            let filename = "";
+
+            // تجهيز الصورة إن وجدت
+            if (imageInput.files.length > 0) {
+                const file = imageInput.files[0];
+                if (file.size > 2 * 1024 * 1024) {
+                    showAlert('حجم الصورة كبير جداً. يرجى اختيار صورة حجمها أقل من 2 ميغابايت.');
+                    btn.disabled = false;
+                    btn.innerHTML = 'إرسال الطلب <i class="fa-regular fa-paper-plane" style="margin-right: 5px;"></i>';
+                    return;
+                }
+
+                // قراءة الملف كنص مشفر
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                await new Promise(resolve => {
+                    reader.onload = function(event) {
+                        base64String = event.target.result.split(',')[1];
+                        mimeType = file.type;
+                        filename = file.name;
+                        resolve();
+                    };
+                });
+            }
+
+            // إرسال البيانات (بالصورة أو بدونها) لسكربت جوجل ليتولى إرسال الإيميلات
+            try {
+                const response = await fetch(googleScriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        secretToken: "DateTool_Secure_Support_2026_XYZ",
+                        senderName: name,
+                        senderEmail: email,
+                        message: message,
+                        base64: base64String,
+                        mimeType: mimeType,
+                        filename: filename
+                    }),
+                    headers: { "Content-Type": "text/plain;charset=utf-8" }
+                });
+                
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    // بعد نجاح الإيميلات ورفع الصورة، نحفظ التذكرة في فايربيس
+                    await saveTicketToDatabase(name, email, message, result.fileUrl);
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (err) {
+                grecaptcha.reset(); 
+                btn.disabled = false;
+                btn.innerHTML = 'إرسال الطلب <i class="fa-regular fa-paper-plane" style="margin-right: 5px;"></i>';
+                showAlert('حدث خطأ أثناء الإرسال، يرجى المحاولة لاحقاً.');
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>

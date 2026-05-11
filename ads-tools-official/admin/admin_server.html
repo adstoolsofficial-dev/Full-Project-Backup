@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الخادم (Server) | بوابة الإدارة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin_shared.css">
+
+    <style>
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); z-index: 9999999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.4s ease;}
+        body.layout-ready #loader { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        .top-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);}
+        .btn-secondary { background: #64748b; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; text-decoration: none; display: inline-block;}
+        
+        .dashboard-panel { background: var(--bg-container); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 30px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);}
+        .panel-header { background: var(--bg-body); padding: 15px 25px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; font-weight: bold; color: var(--text-main); font-size: 16px;}
+        .panel-body { padding: 25px;}
+
+        /* جدول المعلومات */
+        .info-table { width: 100%; border-collapse: collapse; }
+        .info-table td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); font-size: 14px;}
+        .info-table td:first-child { font-weight: bold; color: var(--text-main); width: 40%; background:var(--bg-body);}
+        .info-table td:last-child { background:var(--bg-container); color: var(--text-main); font-family: monospace; font-size: 15px; direction: ltr; text-align: right;}
+        
+        /* المنطقة الحمراء */
+        .danger-zone { border: 2px solid #fca5a5; background: #fef2f2; border-radius: 0 0 12px; padding: 25px;}
+        .danger-item { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; padding: 15px 0; border-bottom: 1px solid #fecaca;}
+        .danger-item:last-child { border-bottom: none; padding-bottom: 0;}
+        .danger-item h4 { margin: 0 0 5px 0; color: #991b1b; font-size: 16px;}
+        .danger-item p { margin: 0; font-size: 13px; color: #b91c1c;}
+        .btn-danger { background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.2s; min-width: 150px;}
+        .btn-danger:hover { background: #dc2626; transform: scale(1.05);}
+        .btn-warning { background: #f59e0b; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.2s; min-width: 150px;}
+        .btn-warning:hover { background: #d97706; transform: scale(1.05);}
+
+        /* شاشة مخرجات السيرفر (Console) */
+        .console-output { background: #0f172a; color: #10b981; font-family: monospace; padding: 15px; border-radius: 8px; height: 100px; overflow-y: auto; font-size: 13px; direction: ltr; text-align: left; margin-top: 15px; border: 1px solid #334155;}
+    </style>
+</head>
+<body>
+    
+    <div id="loader">
+        <i class="fa-solid fa-server fa-beat-fade fa-3x" style="margin-bottom: 15px; color: #ef4444;"></i>
+        <h3 style="font-family: 'Cairo';">جاري الاتصال بالخادم...</h3>
+    </div>
+    
+    <main class="main-wrapper" id="mainWrapper">
+        
+        <div class="top-actions">
+            <div>
+                <h2 style="color: var(--text-main); margin: 0; font-size: 24px;"><i class="fa-solid fa-terminal"></i> إدارة الخادم (Server Management)</h2>
+                <p style="color: var(--text-sub); font-size: 13px; margin-top: 5px;">تحكم كامل في بيئة تشغيل المنصة (Node.js & PM2).</p>
+            </div>
+            <div>
+                <a href="admin.html" class="btn-secondary"><i class="fa-solid fa-arrow-right"></i> عودة لمركز القيادة</a>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+            
+            <div>
+                <div class="dashboard-panel">
+                    <div class="panel-header"><i class="fa-solid fa-circle-info"></i> بيئة التشغيل والمعلومات</div>
+                    <div class="panel-body" style="padding: 0;">
+                        <table class="info-table">
+                            <tr>
+                                <td>عنوان الـ IP للخادم</td>
+                                <td>76.13.32.119</td>
+                            </tr>
+                            <tr>
+                                <td>حالة السيرفر (PM2)</td>
+                                <td style="color: #10b981; font-weight: bold;">متصل ويعمل (Online)</td>
+                            </tr>
+                            <tr>
+                                <td>المنفذ الداخلي (Port)</td>
+                                <td>3000</td>
+                            </tr>
+                            <tr>
+                                <td>حارس البوابة (Proxy)</td>
+                                <td>Nginx / Cloudflare</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="dashboard-panel">
+                    <div class="panel-header"><i class="fa-solid fa-terminal"></i> شاشة الاستجابة (Console)</div>
+                    <div class="panel-body">
+                        <p style="font-size: 12px; color: var(--text-sub); margin: 0;">تظهر هنا نتيجة تنفيذ الأوامر:</p>
+                        <div class="console-output" id="serverConsole">
+                            > Server connected securely.
+                            > Awaiting commands...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="dashboard-panel" style="border-color: #fecaca;">
+                    <div class="panel-header" style="background: #fef2f2; color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> منطقة العمليات الحرجة (Danger Zone)</div>
+                    <div class="panel-body danger-zone">
+                        
+                        <div class="danger-item">
+                            <div>
+                                <h4><i class="fa-solid fa-rotate"></i> إعادة تشغيل المحرك (Restart)</h4>
+                                <p>يقوم بإعادة تشغيل تطبيق Node.js فوراً. لتطبيق أي أكواد جديدة في server.js.</p>
+                            </div>
+                            <button class="btn-danger" onclick="executeServerAction('restart_server')"><i class="fa-solid fa-power-off"></i> إعادة التشغيل</button>
+                        </div>
+
+                        <div class="danger-item">
+                            <div>
+                                <h4><i class="fa-solid fa-broom"></i> تفريغ الذاكرة (Clear Cache)</h4>
+                                <p>مسح الجلسات المؤقتة والملفات الزائدة لتحرير الذاكرة وتسريع النظام.</p>
+                            </div>
+                            <button class="btn-warning" onclick="executeServerAction('clear_cache')"><i class="fa-solid fa-trash-can"></i> مسح الكاش</button>
+                        </div>
+
+                        <div class="danger-item">
+                            <div style="opacity: 0.5;">
+                                <h4 style="color: var(--text-main);"><i class="fa-solid fa-database"></i> نسخ احتياطي (قريباً)</h4>
+                                <p style="color: var(--text-sub);">سيقوم بضغط مجلد tools بالكامل وحفظه كملف ZIP.</p>
+                            </div>
+                            <button class="btn-secondary" style="background: #cbd5e1; cursor: not-allowed; min-width: 150px;">غير مفعل</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initAdminLayout } from './admin_shared.js'; 
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAgdxyNBFrwJuAnoVq6OmZKZZvRknFyVQ8",
+            authDomain: "date-tool-official.firebaseapp.com",
+            projectId: "date-tool-official",
+            storageBucket: "date-tool-official.firebasestorage.app",
+            messagingSenderId: "219114793241",
+            appId: "1:219114793241:web:ee933836c68f7e712fbd88"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const adminData = await initAdminLayout(auth, db, 'server'); 
+                    if (adminData.role !== 'super_admin') {
+                        window.location.href = 'admin.html'; return; // منع الدخول لغير المدير العام
+                    }
+                    document.getElementById('loader').style.display = 'none';
+                    document.body.classList.add('layout-ready');
+                } catch (error) { document.getElementById('loader').innerHTML = `<h3 style="color:red;">حدث خطأ.</h3>`; }
+            } else { window.location.href = 'admin_login.html'; }
+        });
+
+        // دالة تنفيذ الأوامر وكتابتها في الـ Console
+        window.executeServerAction = async (actionType) => {
+            const consoleBox = document.getElementById('serverConsole');
+            let confirmMsg = '';
+            
+            if(actionType === 'restart_server') confirmMsg = '⚠️ تحذير: هل أنت متأكد من إعادة تشغيل السيرفر؟ قد يؤدي هذا لانقطاع لحظي للخدمة.';
+            if(actionType === 'clear_cache') confirmMsg = 'هل أنت متأكد من مسح الذاكرة المؤقتة؟';
+
+            if(!confirm(confirmMsg)) return;
+
+            consoleBox.innerHTML += `<br>> Executing command: <b>${actionType}</b>...`;
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+
+            try {
+                const response = await fetch('/api/server-action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: actionType })
+                });
+                
+                const result = await response.json();
+                consoleBox.innerHTML += `<br>> <span style="color: #34d399;">${result.message}</span>`;
+                consoleBox.scrollTop = consoleBox.scrollHeight;
+
+                if(actionType === 'restart_server') {
+                    consoleBox.innerHTML += `<br>> <span style="color: #f59e0b;">Connection will drop. Reconnecting in 3s...</span>`;
+                    setTimeout(() => window.location.reload(), 3000);
+                }
+            } catch(e) {
+                consoleBox.innerHTML += `<br>> <span style="color: #ef4444;">ERROR: Failed to reach server.</span>`;
+            }
+        };
+    </script>
+</body>
+</html>

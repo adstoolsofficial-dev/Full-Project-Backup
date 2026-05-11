@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة حملة إعلانية جديدة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            margin: 0;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+
+        /* الشريط العلوي */
+        .navbar {
+            background-color: #1e293b;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar a { color: #94a3b8; text-decoration: none; font-weight: 600; transition: 0.3s; margin-right: 20px;}
+        .navbar a:hover { color: white; }
+
+        /* حاوية النموذج */
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border-top: 5px solid #3b82f6;
+        }
+        
+        .header-title {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 15px;
+        }
+        .header-title h1 { margin: 0; color: #0f172a; font-size: 24px; }
+        .header-title p { color: #64748b; font-size: 14px; margin-top: 5px; }
+
+        /* تصميم الحقول */
+        .form-row { display: flex; gap: 20px; flex-wrap: wrap; }
+        .form-group { margin-bottom: 20px; flex: 1; min-width: 250px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #1e293b; font-size: 14px; }
+        
+        /* حقول الإدخال والوقت */
+        .form-group input[type="text"],
+        .form-group input[type="url"],
+        .form-group input[type="datetime-local"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 15px;
+            box-sizing: border-box;
+            transition: 0.3s;
+            background-color: #f8fafc;
+        }
+        .form-group input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); background-color: white;}
+
+        /* ملخص المدة المحسوبة */
+        .duration-summary {
+            background-color: #e0f2fe;
+            border: 1px solid #bae6fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            margin-bottom: 25px;
+            display: none; 
+            align-items: center;
+            gap: 15px;
+        }
+        .duration-summary i { font-size: 24px; color: #0284c7; }
+        .duration-text { color: #0369a1; font-weight: 700; font-size: 16px; }
+
+        /* زر الحفظ */
+        .submit-btn {
+            width: 100%;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            transition: 0.3s;
+            margin-top: 15px;
+        }
+        .submit-btn:hover { background-color: #2563eb; }
+
+        /* تلميح رابط الصورة */
+        .url-hint { font-size: 12px; color: #64748b; margin-top: 8px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div style="font-size: 18px; font-weight: bold;"><i class="fa-solid fa-bullseye"></i> بوابة المعلنين</div>
+        <div>
+            <a href="client_dashboard.html"><i class="fa-solid fa-chart-simple"></i> لوحة التحكم</a>
+            <a href="index.html"><i class="fa-solid fa-arrow-right-from-bracket"></i> تسجيل الخروج</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header-title">
+            <h1>إضافة حملة إعلانية جديدة</h1>
+            <p>قم بتحديد تفاصيل إعلانك والوقت الدقيق لظهوره على الموقع</p>
+        </div>
+
+        <form id="campaignForm">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>اسم الحملة الإعلانية (لتمييزها في لوحتك)</label>
+                    <input type="text" id="campaignName" placeholder="مثال: خصومات رمضان 2026" required>
+                </div>
+                <div class="form-group">
+                    <label>الرابط المستهدف (URL)</label>
+                    <input type="url" id="targetUrl" placeholder="https://yourstore.com/offer" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fa-regular fa-calendar-check" style="color: #22c55e;"></i> وقت وتاريخ بداية الإعلان</label>
+                    <input type="datetime-local" id="startTime" required onchange="calculateDuration()">
+                </div>
+                <div class="form-group">
+                    <label><i class="fa-regular fa-calendar-xmark" style="color: #ef4444;"></i> وقت وتاريخ نهاية الإعلان</label>
+                    <input type="datetime-local" id="endTime" required onchange="calculateDuration()">
+                </div>
+            </div>
+
+            <div class="duration-summary" id="durationBox">
+                <i class="fa-solid fa-stopwatch"></i>
+                <div>
+                    <div style="font-size: 13px; color: #0284c7;">إجمالي مدة ظهور الإعلان:</div>
+                    <div class="duration-text" id="durationText">جاري الحساب...</div>
+                </div>
+            </div>
+
+            <div class="form-group" style="width: 100%;">
+                <label><i class="fa-solid fa-link" style="color: #3b82f6;"></i> رابط صورة البانر المباشر</label>
+                <input type="url" id="imageUrl" placeholder="مثال: https://img.com/your-banner.png" required>
+                <div class="url-hint">
+                    <i class="fa-solid fa-circle-info"></i> قم برفع صورتك على أي موقع لرفع الصور (مثل Imgur) وضع الرابط المباشر هنا. (المقاس الموصى به: 728×90)
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn"><i class="fa-solid fa-rocket" style="margin-left: 5px;"></i> إطلاق الحملة الإعلانية</button>
+        </form>
+    </div>
+
+    <script>
+        function calculateDuration() {
+            const startInput = document.getElementById('startTime').value;
+            const endInput = document.getElementById('endTime').value;
+            const durationBox = document.getElementById('durationBox');
+            const durationText = document.getElementById('durationText');
+
+            if (startInput && endInput) {
+                const startDate = new Date(startInput);
+                const endDate = new Date(endInput);
+
+                if (endDate <= startDate) {
+                    durationBox.style.display = 'flex';
+                    durationBox.style.backgroundColor = '#fef2f2';
+                    durationBox.style.borderColor = '#fecaca';
+                    durationText.style.color = '#dc2626';
+                    durationText.innerHTML = "تنبيه: يجب أن يكون وقت النهاية بعد وقت البداية!";
+                    return;
+                }
+
+                const diffTime = Math.abs(endDate - startDate);
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+                let resultString = "";
+                if (diffDays > 0) resultString += `${diffDays} يوم و `;
+                resultString += `${diffHours} ساعة`;
+
+                durationBox.style.display = 'flex';
+                durationBox.style.backgroundColor = '#e0f2fe';
+                durationBox.style.borderColor = '#bae6fd';
+                durationText.style.color = '#0369a1';
+                durationText.innerHTML = resultString;
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAgdxyNBFrwJuAnoVq6OmZKZZvRknFyVQ8",
+            authDomain: "date-tool-official.firebaseapp.com",
+            projectId: "date-tool-official",
+            storageBucket: "date-tool-official.firebasestorage.app",
+            messagingSenderId: "219114793241",
+            appId: "1:219114793241:web:ee933836c68f7e712fbd88",
+            measurementId: "G-ZKCJC1Y7X7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        document.getElementById('campaignForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            
+            if (!user) {
+                alert("يرجى تسجيل الدخول أولاً!");
+                return;
+            }
+
+            const btn = document.querySelector('.submit-btn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> جاري إرسال الطلب...";
+
+            try {
+                // توليد رقم الإعلان التسلسلي
+                const q = query(collection(db, "campaigns"), orderBy("campaignId", "desc"), limit(1));
+                const snapshot = await getDocs(q);
+                let nextId = 1001; 
+                if (!snapshot.empty) {
+                    const lastId = snapshot.docs[0].data().campaignId;
+                    if (typeof lastId === 'number') nextId = lastId + 1;
+                }
+
+                // حفظ البيانات كنصوص فقط
+                await addDoc(collection(db, "campaigns"), {
+                    campaignId: nextId,
+                    advertiserId: user.uid,
+                    campaignName: document.getElementById('campaignName').value,
+                    targetUrl: document.getElementById('targetUrl').value,
+                    startTime: document.getElementById('startTime').value,
+                    endTime: document.getElementById('endTime').value,
+                    imageUrl: document.getElementById('imageUrl').value, // رابط الصورة المباشر من المربع
+                    status: "قيد المراجعة",
+                    createdAt: new Date().toISOString()
+                });
+
+                alert('تم حفظ حملتك بنجاح وإرسالها للمراجعة! رقم إعلانك هو: ' + nextId);
+                window.location.href = 'client_dashboard.html';
+            } catch (error) {
+                alert("حدث خطأ أثناء الإرسال: " + error.message);
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        });
+    </script>
+</body>
+</html>

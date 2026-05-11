@@ -1,0 +1,44 @@
+{
+    "customPages": {},
+    "pages": {
+        "app/[slug]/page.jsx": {
+            "location": "hidden"
+        },
+        "app/privacy/page.jsx": {
+            "location": "both",
+            "title": "سياسة الخصوصية"
+        },
+        "app/terms/page.jsx": {
+            "location": "both",
+            "title": "شروط الاستخدام"
+        },
+        "app/contact/page.jsx": {
+            "location": "both",
+            "title": "اتصل بنا "
+        }
+    },
+    "mainSEO": {},
+    "externalLinks": [
+        {
+            "title": "مدونتنا تجربة اضافة رابط خارجي",
+            "url": "https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox",
+            "location": "both"
+        }
+    ],
+    "socialMedia": [
+        {
+            "url": "https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox",
+            "icon": "fa-solid fa-link"
+        }
+    ],
+    "toolDisplayName": "أدوات التاريخ الشاملة",
+    "toolDomain": "date-tool.com",
+    "googleAnalytics": "",
+    "hasLogo": true,
+    "hasFavicon": true,
+    "contactEmail": "",
+    "toolSlogan": "لحساب العمر , التحويل , والمدد",
+    "copyright": "بوابة أدوات التاريخ الشاملة",
+    "logoFile": "logo.svg",
+    "faviconFile": "favicon.svg"
+}

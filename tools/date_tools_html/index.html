@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أدوات التاريخ والعمر | Date Tool</title>
+    <link rel="icon" type="image/png" href="logo.png"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MH1Q01HZ2K"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-MH1Q01HZ2K');
+    </script>
+
+    <style>
+        /* ================= المتغيرات الأساسية ================= */
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --border-color: #e2e8f0;
+            --input-bg: #f8fafc;
+            --ad-bg: #f1f5f9;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --result-bg: #f0fdf4;
+            --result-text: #166534;
+            --ad-accent: #f59e0b;
+        }
+
+        /* ================= الوضع المظلم ================= */
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border-color: #334155;
+            --input-bg: #0f172a;
+            --ad-bg: #1e293b;
+            --primary: #60a5fa;
+            --primary-hover: #3b82f6;
+            --result-bg: rgba(34, 197, 94, 0.1);
+            --result-text: #4ade80;
+            --ad-accent: #94a3b8;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        /* تعديل الخط في حال اللغة الإنجليزية ليكون متناسقاً */
+        html[dir="ltr"] body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            position: relative;
+        }
+        
+        .header { text-align: center; margin-bottom: 30px; position: relative; }
+        .logo { max-width: 120px; height: auto; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
+        .header h1 { font-size: 26px; margin: 0; color: var(--text-main); }
+        
+        /* ================= أزرار التحكم (المظهر واللغة) ================= */
+        .top-controls {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            display: flex;
+            gap: 10px;
+        }
+        html[dir="ltr"] .top-controls {
+            left: auto;
+            right: 0;
+        }
+
+        .control-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-sub);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+        }
+        .control-btn:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+            background: transparent;
+        }
+
+        .card {
+            background: var(--bg-card);
+            padding: 25px 30px;
+            margin-bottom: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            transition: background-color 0.4s ease, box-shadow 0.4s ease;
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+        body.dark-mode .card { border-color: var(--border-color); box-shadow: none; }
+        
+        h2 { text-align: center; color: var(--text-main); font-size: 20px; margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px;}
+        h2::before, h2::after { content: ""; height: 1px; background: var(--border-color); flex: 1; margin: 0 15px;}
+        
+        h3 { color: var(--text-sub); font-size: 16px; margin-top: 0; margin-bottom: 15px; font-weight: 700;}
+        
+        .split-section { display: flex; gap: 20px; margin-top: 10px; }
+        .split-section > div { flex: 1; padding: 20px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; transition: all 0.3s; }
+        @media (max-width: 768px) { .split-section { flex-direction: column; } }
+
+        .date-dropdowns { display: flex; gap: 8px; margin: 12px 0 20px 0; }
+        .date-dropdowns select {
+            flex: 1; text-align: center; padding: 12px 5px; border: 1px solid var(--border-color);
+            border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: 600;
+            background-color: var(--bg-card); color: var(--text-main);
+            transition: all 0.3s ease; cursor: pointer; appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat; background-position: left 10px center; background-size: 15px;
+        }
+        html[dir="ltr"] .date-dropdowns select { background-position: right 10px center; }
+        .date-dropdowns select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);}
+
+        button.action-btn { 
+            padding: 14px; width: 100%; background-color: var(--primary); color: #fff; 
+            border: none; cursor: pointer; font-size: 15px; font-weight: bold; font-family: inherit;
+            border-radius: 8px; transition: 0.3s; display: flex; align-items: center; justify-content: center;
+        }
+        button.action-btn:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        body.dark-mode button.action-btn { color: #0f172a; }
+        button.action-btn i { margin-left: 8px; }
+        html[dir="ltr"] button.action-btn i { margin-left: 0; margin-right: 8px; }
+        
+        .result { 
+            margin-top: 15px; padding: 15px; background-color: var(--result-bg); 
+            border-radius: 8px; display: none; font-size: 15px; color: var(--result-text); 
+            font-weight: 700; text-align: center; line-height: 1.6; transition: all 0.3s;
+            border: 1px dashed rgba(34, 197, 94, 0.3);
+        }
+
+        label { font-weight: 600; color: var(--text-main); font-size: 13px; display: block; margin-top: 10px; }
+
+        .ad-placeholder { 
+            background-color: var(--ad-bg); border: 1px dashed var(--border-color); 
+            text-align: center; padding: 15px; margin-bottom: 25px; color: var(--text-sub); 
+            font-size: 13px; font-weight: 600; border-radius: 12px; transition: all 0.3s; 
+            display: flex; align-items: center; justify-content: center; min-height: 90px;
+            opacity: 0.7;
+        }
+        
+        .custom-ad-promo {
+            border: 1px solid var(--border-color); 
+            background-color: var(--bg-card);
+            color: var(--text-sub); 
+            cursor: pointer;
+            text-decoration: none;
+            opacity: 1;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+        .custom-ad-promo i { color: var(--ad-accent); margin: 0 8px;}
+        .custom-ad-promo:hover { border-color: var(--ad-accent); color: var(--text-main);}
+        
+        .bottom-banners-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        @media (max-width: 600px) { .bottom-banners-grid { grid-template-columns: 1fr; } }
+
+        .custom-alert {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background-color: #ef4444; color: white; padding: 15px 25px; border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); font-weight: 600; font-size: 14px; z-index: 1000;
+            transition: top 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            display: flex; align-items: center; gap: 10px; min-width: 250px; justify-content: center;
+        }
+        .custom-alert.show { top: 30px; }
+        .custom-alert.info { background-color: var(--primary); }
+
+        footer { text-align: center; margin-top: 40px; padding: 25px 20px 15px 20px; color: var(--text-sub); border-top: 1px solid var(--border-color); font-size: 13px; }
+        .footer-links { margin-bottom: 15px; display: flex; justify-content: center; gap: 20px;}
+        .footer-links a { color: var(--text-main); text-decoration: none; font-weight: 600; transition: 0.2s; display: flex; align-items: center; gap: 5px;}
+        .footer-links a i { color: var(--primary); font-size: 15px;}
+        .footer-links a:hover { color: var(--primary); }
+    </style>
+</head>
+<body data-page-id="date-tool">
+
+<div id="customAlert" class="custom-alert"></div>
+
+<div class="container">
+    <div class="header">
+        <div class="top-controls">
+            <button id="themeToggleBtn" class="control-btn" title="تبديل المظهر"><i class="fa-solid fa-moon"></i></button>
+            <button id="langToggleBtn" class="control-btn" title="English">EN</button>
+        </div>
+        <img src="logo.png" alt="Date Tool Logo" class="logo">
+        <h1 data-i18n="pageTitle">أدوات التاريخ الشاملة</h1>
+    </div>
+
+    <div class="ad-placeholder" data-ad-location="top-banner">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1147243690926079" crossorigin="anonymous"></script>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-1147243690926079"
+             data-ad-slot="7882868833"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+
+    <div class="card">
+        <h2 data-i18n="hCalcAge">احسب عمرك بدقة</h2>
+        <div class="split-section">
+            <div>
+                <h3 data-i18n="hGreg">بالتاريخ الميلادي</h3>
+                <label data-i18n="lblBirth">أدخل تاريخ ميلادك:</label>
+                <div class="date-dropdowns">
+                    <select id="gDayAge" class="greg-day"></select>
+                    <select id="gMonthAge" class="greg-month"></select>
+                    <select id="gYearAge" class="greg-year"></select>
+                </div>
+                <button class="action-btn" onclick="calculateAgeGreg()">
+                    <i class="fa-solid fa-calculator"></i> <span data-i18n="btnCalc">احسب العمر</span>
+                </button>
+                <div id="ageResultGreg" class="result"></div>
+            </div>
+            <div>
+                <h3 data-i18n="hHijri">بالتاريخ الهجري</h3>
+                <label data-i18n="lblBirth">أدخل تاريخ ميلادك:</label>
+                <div class="date-dropdowns">
+                    <select id="hDayAge" class="hijri-day"></select>
+                    <select id="hMonthAge" class="hijri-month"></select>
+                    <select id="hYearAge" class="hijri-year"></select>
+                </div>
+                <button class="action-btn" onclick="calculateAgeHijri()">
+                    <i class="fa-solid fa-calculator"></i> <span data-i18n="btnCalc">احسب العمر</span>
+                </button>
+                <div id="ageResultHijri" class="result"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="customAdContainer" data-ad-location="middle-banner">
+        <a href="https://ads-tools-official.com" style="text-decoration: none; display: block;">
+            <div class="ad-placeholder custom-ad-promo">
+                <i class="fa-solid fa-star"></i> <span data-i18n="adPortal">مساحة إعلانية مميزة</span> <i class="fa-solid fa-star"></i>
+            </div>
+        </a>
+    </div>
+
+    <div class="card">
+        <h2 data-i18n="hConv">تحويل التاريخ</h2>
+        <div class="split-section">
+            <div>
+                <h3 data-i18n="hG2H">ميلادي إلى هجري</h3>
+                <label data-i18n="lblGreg">التاريخ الميلادي:</label>
+                <div class="date-dropdowns">
+                    <select id="gDayConv" class="greg-day"></select>
+                    <select id="gMonthConv" class="greg-month"></select>
+                    <select id="gYearConv" class="greg-year"></select>
+                </div>
+                <button class="action-btn" onclick="convertGregToHijri()">
+                    <i class="fa-solid fa-rotate"></i> <span data-i18n="btnG2H">تحويل لهجري</span>
+                </button>
+                <div id="hijriResult" class="result"></div>
+            </div>
+            <div>
+                <h3 data-i18n="hH2G">هجري إلى ميلادي</h3>
+                <label data-i18n="lblHijri">التاريخ الهجري:</label>
+                <div class="date-dropdowns">
+                    <select id="hDayConv" class="hijri-day"></select>
+                    <select id="hMonthConv" class="hijri-month"></select>
+                    <select id="hYearConv" class="hijri-year"></select>
+                </div>
+                <button class="action-btn" onclick="convertHijriToGreg()">
+                    <i class="fa-solid fa-rotate"></i> <span data-i18n="btnH2G">تحويل لميلادي</span>
+                </button>
+                <div id="gregResult" class="result"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 data-i18n="hDiff">حساب المدة بين تاريخين</h2>
+        <div class="split-section">
+            <div>
+                <h3 data-i18n="hDiffGreg">بالميلادي</h3>
+                <label data-i18n="lblDate1">التاريخ الأول:</label>
+                <div class="date-dropdowns">
+                    <select id="gDayDiff1" class="greg-day"></select>
+                    <select id="gMonthDiff1" class="greg-month"></select>
+                    <select id="gYearDiff1" class="greg-year"></select>
+                </div>
+                <label data-i18n="lblDate2">التاريخ الثاني:</label>
+                <div class="date-dropdowns">
+                    <select id="gDayDiff2" class="greg-day"></select>
+                    <select id="gMonthDiff2" class="greg-month"></select>
+                    <select id="gYearDiff2" class="greg-year"></select>
+                </div>
+                <button class="action-btn" onclick="calcDiffGreg()">
+                    <i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="btnDiff">احسب المدة</span>
+                </button>
+                <div id="diffResultGreg" class="result"></div>
+            </div>
+            <div>
+                <h3 data-i18n="hDiffHijri">بالهجري</h3>
+                <label data-i18n="lblDate1">التاريخ الأول:</label>
+                <div class="date-dropdowns">
+                    <select id="hDayDiff1" class="hijri-day"></select>
+                    <select id="hMonthDiff1" class="hijri-month"></select>
+                    <select id="hYearDiff1" class="hijri-year"></select>
+                </div>
+                <label data-i18n="lblDate2">التاريخ الثاني:</label>
+                <div class="date-dropdowns">
+                    <select id="hDayDiff2" class="hijri-day"></select>
+                    <select id="hMonthDiff2" class="hijri-month"></select>
+                    <select id="hYearDiff2" class="hijri-year"></select>
+                </div>
+                <button class="action-btn" onclick="calcDiffHijri()">
+                    <i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="btnDiff">احسب المدة</span>
+                </button>
+                <div id="diffResultHijri" class="result"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-banners-grid">
+        <div class="ad-placeholder" id="bottomBanner1Container" data-ad-location="bottom-banner-1" data-i18n="adBanner1">مساحة إعلانية (بانر 1)</div>
+        <div class="ad-placeholder" id="bottomBanner2Container" data-ad-location="bottom-banner-2" data-i18n="adBanner2">مساحة إعلانية (بانر 2)</div>
+    </div>
+
+</div>
+
+<footer>
+    <div>
+        <span data-i18n="rights">جميع الحقوق محفوظة</span> &copy; <span id="currentYear"></span> - <span data-i18n="footerPortal">بوابة أدوات التاريخ</span>
+    </div>
+</footer>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app-check.js";
+    import { getFirestore, collection, query, where, getDocs, doc, updateDoc, increment, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAgdxyNBFrwJuAnoVq6OmZKZZvRknFyVQ8",
+        authDomain: "date-tool-official.firebaseapp.com",
+        projectId: "date-tool-official",
+        storageBucket: "date-tool-official.firebasestorage.app",
+        messagingSenderId: "219114793241",
+        appId: "1:219114793241:web:ee933836c68f7e712fbd88",
+        measurementId: "G-ZKCJC1Y7X7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const appCheck = initializeAppCheck(app, {
+        provider: new ReCaptchaEnterpriseProvider('6Ldch4ssAAAAAM0HeNiBNFlQBqXM9dUL4SNm1mxM'),
+        isTokenAutoRefreshEnabled: true
+    });
+    const db = getFirestore(app);
+
+    async function initAndTrackVisit() {
+        const statsRef = doc(db, "statistics", "main");
+        try {
+            const snap = await getDoc(statsRef);
+            if (!snap.exists()) {
+                await setDoc(statsRef, { visits: 1, ageCalc: 0, dateConverter: 0, durationCalc: 0 });
+            } else {
+                await updateDoc(statsRef, { visits: increment(1) });
+            }
+        } catch (error) { console.error("Error tracking visit:", error); }
+    }
+    initAndTrackVisit();
+
+    window.trackToolUsage = async function(toolName) {
+        try {
+            const statsRef = doc(db, "statistics", "main");
+            let updateData = {};
+            updateData[toolName] = increment(1);
+            await updateDoc(statsRef, updateData);
+        } catch (error) { console.error("Error tracking tool:", error); }
+    };
+
+    async function displayActiveBanner() {
+        try {
+            console.log("نظام الإعلانات جاهز للربط مع اللوحة الإدارية بناءً على المُعرّفات.");
+        } catch (error) {
+            console.error("خطأ في جلب الإعلان:", error);
+        }
+    }
+    displayActiveBanner();
+</script>
+
+<script>
+    // ================= قاموس اللغات (الترجمة الفورية) =================
+    const i18n = {
+        ar: {
+            pageTitle: "أدوات التاريخ الشاملة", hCalcAge: "احسب عمرك بدقة", hGreg: "بالتاريخ الميلادي", hHijri: "بالتاريخ الهجري",
+            lblBirth: "أدخل تاريخ ميلادك:", btnCalc: "احسب العمر", hConv: "تحويل التاريخ", hG2H: "ميلادي إلى هجري", hH2G: "هجري إلى ميلادي",
+            lblGreg: "التاريخ الميلادي:", lblHijri: "التاريخ الهجري:", btnG2H: "تحويل لهجري", btnH2G: "تحويل لميلادي",
+            hDiff: "حساب المدة بين تاريخين", hDiffGreg: "بالميلادي", hDiffHijri: "بالهجري", lblDate1: "التاريخ الأول:", lblDate2: "التاريخ الثاني:",
+            btnDiff: "احسب المدة", adPortal: "مساحة إعلانية مميزة", navHome: "الرئيسية", navPortal: "بوابة المعلنين",
+            rights: "جميع الحقوق محفوظة", footerPortal: "بوابة أدوات التاريخ", adBanner1: "مساحة إعلانية (بانر 1)", adBanner2: "مساحة إعلانية (بانر 2)",
+            day: "اليوم", month: "الشهر", year: "السنة", errSelect: "الرجاء اختيار التاريخ كاملاً", errFuture: "التاريخ لا يمكن أن يكون في المستقبل!",
+            resAge: "عمرك هو:", resAgeH: "عمرك بالهجري:", resDiffText: "المدة بينهما:", resG2H: "يوافق هجرياً:", resH2G: "يوافق ميلادياً:", sameDay: "اليوم (نفس التاريخ)",
+            y1: "سنة", y2: "سنتين", y3: "سنوات", y4: "سنة", m1: "شهر", m2: "شهرين", m3: "أشهر", m4: "شهر", d1: "يوم", d2: "يومين", d3: "أيام", d4: "يوم", and: " و "
+        },
+        en: {
+            pageTitle: "Comprehensive Date Tools", hCalcAge: "Calculate Your Age", hGreg: "Gregorian Date", hHijri: "Hijri Date",
+            lblBirth: "Enter your birth date:", btnCalc: "Calculate Age", hConv: "Date Conversion", hG2H: "Gregorian to Hijri", hH2G: "Hijri to Gregorian",
+            lblGreg: "Gregorian Date:", lblHijri: "Hijri Date:", btnG2H: "Convert to Hijri", btnH2G: "Convert to Gregorian",
+            hDiff: "Duration Between Dates", hDiffGreg: "In Gregorian", hDiffHijri: "In Hijri", lblDate1: "First Date:", lblDate2: "Second Date:",
+            btnDiff: "Calculate Duration", adPortal: "Advertisers Portal - Click here to login & manage ads", navHome: "Home", navPortal: "Advertisers Portal",
+            rights: "All Rights Reserved", footerPortal: "Date Tools Portal", adBanner1: "Ad Space (Banner 1)", adBanner2: "Ad Space (Banner 2)",
+            day: "Day", month: "Month", year: "Year", errSelect: "Please select the complete date", errFuture: "Date cannot be in the future!",
+            resAge: "Your age is:", resAgeH: "Your Hijri age is:", resDiffText: "Duration between them:", resG2H: "Hijri equivalent:", resH2G: "Gregorian equivalent:", sameDay: "Today (Same Date)",
+            y1: "year", y2: "years", y3: "years", y4: "years", m1: "month", m2: "months", m3: "months", m4: "months", d1: "day", d2: "days", d3: "days", d4: "days", and: " and "
+        }
+    };
+
+    const monthNames = {
+        ar: { greg: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+              hijri: ['محرم', 'صفر', 'ربيع الأول', 'ربيع الآخر', 'جمادى الأولى', 'جمادى الآخرة', 'رجب', 'شعبان', 'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'] },
+        en: { greg: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+              hijri: ['Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani', 'Jumada al-Awwal', 'Jumada al-Thani', 'Rajab', 'Shaaban', 'Ramadan', 'Shawwal', 'Dhu al-Qadah', 'Dhu al-Hijjah'] }
+    };
+
+    let currentLang = localStorage.getItem('site_lang') || 'ar';
+
+    // ================= منطق الواجهة والسمة (Theme) =================
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const langBtn = document.getElementById('langToggleBtn');
+    const themeIcon = themeBtn.querySelector('i');
+    const osThemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const applyTheme = (isDark) => {
+        if (isDark) { document.body.classList.add('dark-mode'); themeIcon.className = 'fa-solid fa-sun'; } 
+        else { document.body.classList.remove('dark-mode'); themeIcon.className = 'fa-solid fa-moon'; }
+    };
+
+    const savedTheme = localStorage.getItem('site_theme');
+    if (savedTheme !== null) applyTheme(savedTheme === 'dark');
+    else applyTheme(osThemeQuery.matches);
+
+    osThemeQuery.addEventListener('change', (e) => {
+        applyTheme(e.matches);
+        localStorage.removeItem('site_theme');
+    });
+
+    themeBtn.addEventListener('click', () => {
+        const isDarkNow = document.body.classList.toggle('dark-mode');
+        themeIcon.className = isDarkNow ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        localStorage.setItem('site_theme', isDarkNow ? 'dark' : 'light');
+    });
+
+    // ================= منطق تغيير اللغة وبناء القوائم =================
+    function buildDropdowns(lang) {
+        const dict = i18n[lang];
+        const mNames = monthNames[lang];
+
+        const buildSelect = (selector, type, max, names, startYear, endYear) => {
+            document.querySelectorAll(selector).forEach(select => {
+                let val = select.value; // حفظ الاختيار الحالي إن وجد
+                select.innerHTML = `<option value="">${dict[type]}</option>`;
+                if (type === 'day') {
+                    for(let i=1; i<=max; i++) select.innerHTML += `<option value="${i}" ${val==i?'selected':''}>${i}</option>`;
+                } else if (type === 'month') {
+                    names.forEach((name, idx) => {
+                        let mVal = selector.includes('greg') ? (idx+1).toString().padStart(2,'0') : (idx+1);
+                        select.innerHTML += `<option value="${mVal}" ${val==mVal?'selected':''}>${name}</option>`;
+                    });
+                } else if (type === 'year') {
+                    for(let i=startYear; i>=endYear; i--) {
+                        let isSelected = (val == i) ? 'selected' : (!val && i === (selector.includes('greg') ? 2026 : 1447) ? 'selected' : '');
+                        select.innerHTML += `<option value="${i}" ${isSelected}>${i}</option>`;
+                    }
+                }
+            });
+        };
+
+        buildSelect('.greg-day', 'day', 31); buildSelect('.hijri-day', 'day', 30);
+        buildSelect('.greg-month', 'month', null, mNames.greg); buildSelect('.hijri-month', 'month', null, mNames.hijri);
+        buildSelect('.greg-year', 'year', null, null, 2066, 1900); buildSelect('.hijri-year', 'year', null, null, 1487, 1300);
+    }
+
+    function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        langBtn.textContent = lang === 'ar' ? 'EN' : 'عربي';
+        
+        // تحديث النصوص الثابتة
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (i18n[lang][key]) el.textContent = i18n[lang][key];
+        });
+
+        buildDropdowns(lang);
+        
+        // إخفاء النتائج عند تغيير اللغة لتجنب تضارب النصوص القديمة
+        document.querySelectorAll('.result').forEach(res => res.style.display = 'none');
+    }
+
+    langBtn.addEventListener('click', () => {
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+        localStorage.setItem('site_lang', currentLang);
+        applyLanguage(currentLang);
+    });
+
+    window.onload = function() {
+        applyLanguage(currentLang);
+    };
+
+    // ================= دوال الموقع الرياضية =================
+    function showNotification(messageKey, type = 'error') {
+        const alertBox = document.getElementById('customAlert');
+        const icon = type === 'error' ? '<i class="fa-solid fa-circle-exclamation"></i> ' : '<i class="fa-solid fa-circle-check"></i> ';
+        alertBox.innerHTML = icon + i18n[currentLang][messageKey];
+        if (type === 'info') alertBox.classList.add('info'); else alertBox.classList.remove('info');
+        alertBox.classList.add('show');
+        setTimeout(() => alertBox.classList.remove('show'), 3000);
+    }
+
+    function formatDuration(years, months, days) {
+        const dict = i18n[currentLang];
+        function formatPart(value, singular, dual, plural, defaultPlural) {
+            if (value === 0) return "";
+            if (currentLang === 'en') return value === 1 ? `1 ${singular}` : `${value} ${plural}`;
+            if (value === 1) return singular;
+            if (value === 2) return dual;
+            if (value >= 3 && value <= 10) return `${value} ${plural}`;
+            return `${value} ${defaultPlural}`;
+        }
+        let yStr = formatPart(years, dict.y1, dict.y2, dict.y3, dict.y4);
+        let mStr = formatPart(months, dict.m1, dict.m2, dict.m3, dict.m4);
+        let dStr = formatPart(days, dict.d1, dict.d2, dict.d3, dict.d4);
+        let parts = [yStr, mStr, dStr].filter(p => p !== "");
+        if (parts.length === 0) return dict.sameDay;
+        return parts.join(dict.and);
+    }
+
+    function getExactDifference(d1, d2) {
+        let startDate = new Date(Math.min(d1, d2)); let endDate = new Date(Math.max(d1, d2));
+        let years = endDate.getFullYear() - startDate.getFullYear(); let months = endDate.getMonth() - startDate.getMonth(); let days = endDate.getDate() - startDate.getDate();
+        if (days < 0) { months--; let prevMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 0); days += prevMonth.getDate(); }
+        if (months < 0) { years--; months += 12; }
+        return { years, months, days };
+    }
+
+    function calculateAgeGreg() {
+        const d = document.getElementById('gDayAge').value, m = document.getElementById('gMonthAge').value, y = document.getElementById('gYearAge').value;
+        if(!d || !m || !y) return showNotification("errSelect");
+        const birthDate = new Date(`${y}-${m}-${d}`); const today = new Date();
+        if(birthDate > today) return showNotification("errFuture");
+        const diff = getExactDifference(birthDate, today);
+        const resBox = document.getElementById('ageResultGreg'); resBox.style.display = "block";
+        resBox.innerHTML = `${i18n[currentLang].resAge}<br><span style="color:inherit;">${formatDuration(diff.years, diff.months, diff.days)}</span>`;
+        if(window.trackToolUsage) window.trackToolUsage('ageCalc');
+    }
+
+    function calcDiffGreg() {
+        const d1 = document.getElementById('gDayDiff1').value, m1 = document.getElementById('gMonthDiff1').value, y1 = document.getElementById('gYearDiff1').value;
+        const d2 = document.getElementById('gDayDiff2').value, m2 = document.getElementById('gMonthDiff2').value, y2 = document.getElementById('gYearDiff2').value;
+        if(!d1 || !m1 || !y1 || !d2 || !m2 || !y2) return showNotification("errSelect");
+        const date1 = new Date(`${y1}-${m1}-${d1}`), date2 = new Date(`${y2}-${m2}-${d2}`);
+        const diff = getExactDifference(date1, date2);
+        const resBox = document.getElementById('diffResultGreg'); resBox.style.display = "block";
+        resBox.innerHTML = `${i18n[currentLang].resDiffText}<br><span style="color:inherit;">${formatDuration(diff.years, diff.months, diff.days)}</span>`;
+        if(window.trackToolUsage) window.trackToolUsage('durationCalc');
+    }
+
+    function convertGregToHijri() {
+        const d = document.getElementById('gDayConv').value.padStart(2, '0'), m = document.getElementById('gMonthConv').value, y = document.getElementById('gYearConv').value;
+        if(!d || !m || !y) return showNotification("errSelect");
+        const gDate = new Date(`${y}-${m}-${d}`);
+        const options = { year: 'numeric', month: 'long', day: 'numeric', calendar: 'islamic-umalqura' };
+        const locale = currentLang === 'ar' ? 'ar-SA-u-ca-islamic-umalqura' : 'en-US-u-ca-islamic-umalqura';
+        const hDate = new Intl.DateTimeFormat(locale, options).format(gDate);
+        const resBox = document.getElementById('hijriResult'); resBox.style.display = "block";
+        resBox.innerHTML = `${i18n[currentLang].resG2H}<br><span style="color:inherit;">${hDate}</span>`;
+        if(window.trackToolUsage) window.trackToolUsage('dateConverter');
+    }
+
+    function getHijriParts(dateObj) {
+        const parts = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', { day: 'numeric', month: 'numeric', year: 'numeric' }).formatToParts(dateObj);
+        let y, m, d; parts.forEach(p => { if(p.type === 'year') y = parseInt(p.value); if(p.type === 'month') m = parseInt(p.value); if(p.type === 'day') d = parseInt(p.value); });
+        return { y, m, d };
+    }
+
+    function hijriToGregorian(hY, hM, hD) {
+        let target = hY * 10000 + hM * 100 + hD; let minDays = Math.floor(new Date(1900, 0, 1).getTime() / 86400000); let maxDays = Math.floor(new Date(2100, 11, 31).getTime() / 86400000);
+        let resultDays = minDays;
+        for (let i = 0; i < 20; i++) {
+            let midDays = Math.floor((minDays + maxDays) / 2); let midDate = new Date(midDays * 86400000); let p = getHijriParts(midDate); let midVal = p.y * 10000 + p.m * 100 + p.d;
+            if (midVal === target) { resultDays = midDays; break; } else if (midVal < target) { minDays = midDays + 1; } else { maxDays = midDays - 1; }
+        }
+        return new Date(resultDays * 86400000);
+    }
+
+    function calculateAgeHijri() {
+        const dVal = document.getElementById('hDayAge').value, mVal = document.getElementById('hMonthAge').value, yVal = document.getElementById('hYearAge').value;
+        if(!dVal || !mVal || !yVal) return showNotification("errSelect");
+        const bDay = parseInt(dVal), bMonth = parseInt(mVal), bYear = parseInt(yVal);
+        const tp = getHijriParts(new Date()); const tDay = tp.d, tMonth = tp.m, tYear = tp.y;
+        if (bYear > tYear || (bYear === tYear && bMonth > tMonth) || (bYear === tYear && bMonth === tMonth && bDay > tDay)) return showNotification("errFuture");
+        let years = tYear - bYear, months = tMonth - bMonth, days = tDay - bDay;
+        if (days < 0) { months--; days += 30; } if (months < 0) { years--; months += 12; }
+        const resBox = document.getElementById('ageResultHijri'); resBox.style.display = "block";
+        resBox.innerHTML = `${i18n[currentLang].resAgeH}<br><span style="color:inherit;">${formatDuration(years, months, days)}</span>`;
+        if(window.trackToolUsage) window.trackToolUsage('ageCalc');
+    }
+
+    function calcDiffHijri() {
+        const d1Val = document.getElementById('hDayDiff1').value, m1Val = document.getElementById('hMonthDiff1').value, y1Val = document.getElementById('hYearDiff1').value;
+        const dh2Val = document.getElementById('hDayDiff2').value, mh2Val = document.getElementById('hMonthDiff2').value, yh2Val = document.getElementById('hYearDiff2').value;
+        if(!d1Val || !m1Val || !y1Val || !dh2Val || !mh2Val || !yh2Val) return showNotification("errSelect");
+        let y1 = parseInt(y1Val), m1 = parseInt(m1Val), d1 = parseInt(d1Val); let y2 = parseInt(yh2Val), m2 = parseInt(mh2Val), d2 = parseInt(dh2Val);
+        if (y1 > y2 || (y1 === y2 && m1 > m2) || (y1 === y2 && m1 === m2 && d1 > d2)) { let ty = y1, tm = m1, td = d1; y1 = y2; m1 = m2; d1 = d2; y2 = ty; m2 = tm; d2 = td; }
+        let years = y2 - y1, months = m2 - m1, days = d2 - d1;
+        if (days < 0) { months--; days += 30; } if (months < 0) { years--; months += 12; }
+        const resBox = document.getElementById('diffResultHijri'); resBox.style.display = "block";
+        resBox.innerHTML = `${i18n[currentLang].resDiffText}<br><span style="color:inherit;">${formatDuration(years, months, days)}</span>`;
+        if(window.trackToolUsage) window.trackToolUsage('durationCalc');
+    }
+
+    function convertHijriToGreg() {
+        const dVal = document.getElementById('hDayConv').value, mVal = document.getElementById('hMonthConv').value, yVal = document.getElementById('hYearConv').value;
+        if(!dVal || !mVal || !yVal) return showNotification("errSelect");
+        let gDateObj = hijriToGregorian(parseInt(yVal), parseInt(mVal), parseInt(dVal));
+        const options = { year: 'numeric', month: 'long', day: 'numeric' }; 
+        const locale = currentLang === 'ar' ? 'ar-SA' : 'en-US';
+        const gDateFormatted = new Intl.DateTimeFormat(locale, options).format(gDateObj);
+        const suffix = currentLang === 'ar' ? ' م' : '';
+        const resBox = document.getElementById('gregResult'); resBox.style.display = "block";
+        resBox.innerHTML = `${i18n[currentLang].resH2G}<br><span style="color:inherit;">${gDateFormatted}${suffix}</span>`;
+        if(window.trackToolUsage) window.trackToolUsage('dateConverter');
+    }
+</script>
+</body>
+</html>
