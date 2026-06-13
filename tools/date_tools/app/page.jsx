@@ -5,7 +5,7 @@ import { initAndTrackVisit, trackToolUsage } from './firebase';
 import Header from './Header';
 import Footer from './Footer';
 
-const i18n: Record<string, any> = {
+const i18n = {
     ar: {
         pageTitle: "أدوات التاريخ الشاملة", hCalcAge: "احسب عمرك بدقة", hGreg: "بالتاريخ الميلادي", hHijri: "بالتاريخ الهجري",
         lblBirth: "أدخل تاريخ ميلادك:", btnCalc: "احسب العمر", hConv: "تحويل التاريخ", hG2H: "ميلادي إلى هجري", hH2G: "هجري إلى ميلادي",
@@ -30,7 +30,7 @@ const i18n: Record<string, any> = {
     }
 };
 
-const monthNames: Record<string, any> = {
+const monthNames = {
     ar: { greg: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'], hijri: ['محرم', 'صفر', 'ربيع الأول', 'ربيع الآخر', 'جمادى الأولى', 'جمادى الآخرة', 'رجب', 'شعبان', 'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'] },
     en: { greg: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'], hijri: ['Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani', 'Jumada al-Awwal', 'Jumada al-Thani', 'Rajab', 'Shaaban', 'Ramadan', 'Shawwal', 'Dhu al-Qadah', 'Dhu al-Hijjah'] }
 };
@@ -51,17 +51,16 @@ export default function Home() {
     const [hDiffInput1, setHDiffInput1] = useState({ d: '', m: '', y: '' });
     const [hDiffInput2, setHDiffInput2] = useState({ d: '', m: '', y: '' });
 
-    const [resAgeGreg, setResAgeGreg] = useState<string | null>(null);
-    const [resAgeHijri, setResAgeHijri] = useState<string | null>(null);
-    const [resHijriConv, setResHijriConv] = useState<string | null>(null);
-    const [resGregConv, setResGregConv] = useState<string | null>(null);
-    const [resDiffGreg, setResDiffGreg] = useState<string | null>(null);
-    const [resDiffHijri, setResDiffHijri] = useState<string | null>(null);
+    const [resAgeGreg, setResAgeGreg] = useState(null);
+    const [resAgeHijri, setResAgeHijri] = useState(null);
+    const [resHijriConv, setResHijriConv] = useState(null);
+    const [resGregConv, setResGregConv] = useState(null);
+    const [resDiffGreg, setResDiffGreg] = useState(null);
+    const [resDiffHijri, setResDiffHijri] = useState(null);
 
-    // الحالات الجديدة للمميزات
     const [todayInfo, setTodayInfo] = useState('');
-    const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
-    const [enteredDateInfo, setEnteredDateInfo] = useState<{title: string, info: string, shareText: string} | null>(null);
+    const [upcomingEvents, setUpcomingEvents] = useState([]);
+    const [enteredDateInfo, setEnteredDateInfo] = useState(null);
 
     useEffect(() => {
         const savedLang = localStorage.getItem('site_lang') || 'ar';
@@ -72,7 +71,7 @@ export default function Home() {
         setIsDarkMode(savedTheme ? savedTheme === 'dark' : osThemeQuery.matches);
 
         initAndTrackVisit();
-        generateTodayAndEvents(); // توليد المواعيد ومعلومات اليوم تلقائياً
+        generateTodayAndEvents(); 
     }, []);
 
     useEffect(() => {
@@ -101,14 +100,11 @@ export default function Home() {
         setEnteredDateInfo(null);
     }
 
-    const showNotification = (messageKey: string, type = 'error') => {
+    const showNotification = (messageKey, type = 'error') => {
         setAlertConfig({ show: true, msg: i18n[lang][messageKey] || messageKey, type });
         setTimeout(() => setAlertConfig({ show: false, msg: '', type: '' }), 3000);
     };
 
-    // ==========================================
-    // 🧠 1. مكتبة الأحداث الذكية السعودية
-    // ==========================================
     const generateTodayAndEvents = () => {
         const today = new Date();
         const hParts = getHijriParts(today);
@@ -116,34 +112,30 @@ export default function Home() {
         
         setTodayInfo(`اليوم ${currentDayName}، ${today.getDate()} ${monthNames['ar'].greg[today.getMonth()]} م | ${hParts.d} ${monthNames['ar'].hijri[hParts.m - 1]} هـ`);
 
-        let events: any[] = [];
-        const maxDays = 60; // إظهار الأحداث التي تقع خلال الـ 60 يوم القادمة فقط
+        let events = [];
+        const maxDays = 60; 
 
-        // دالة مساعدة للأحداث الشهرية الميلادية (الرواتب، الدعم...)
-        const addMonthlyEvent = (day: number, name: string, icon: string, color: string) => {
+        const addMonthlyEvent = (day, name, icon, color) => {
             let target = new Date(today.getFullYear(), today.getMonth(), day);
             if (today.getDate() > day) target.setMonth(target.getMonth() + 1);
             let diff = Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
             if (diff <= maxDays) events.push({ name, days: diff, icon, color });
         };
 
-        // دالة مساعدة للأحداث الوطنية الثابتة
-        const addNationalEvent = (month: number, day: number, name: string, icon: string, color: string) => {
+        const addNationalEvent = (month, day, name, icon, color) => {
             let target = new Date(today.getFullYear(), month - 1, day);
             if (today > target) target.setFullYear(target.getFullYear() + 1);
             let diff = Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
             if (diff <= maxDays) events.push({ name, days: diff, icon, color });
         };
 
-        // دالة مساعدة للأحداث الهجرية
-        const addHijriEvent = (hMonth: number, hDay: number, name: string, icon: string, color: string) => {
+        const addHijriEvent = (hMonth, hDay, name, icon, color) => {
             let targetYear = hParts.m > hMonth || (hParts.m === hMonth && hParts.d > hDay) ? hParts.y + 1 : hParts.y;
             let targetGreg = hijriToGregorian(targetYear, hMonth, hDay);
             let diff = Math.ceil((targetGreg.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
             if (diff >= 0 && diff <= maxDays) events.push({ name, days: diff, icon, color });
         };
 
-        // 1. الأحداث والمواعيد الحكومية السعودية
         addMonthlyEvent(27, 'الرواتب (القطاع العام)', 'fa-money-bill-wave', '#10b981');
         addMonthlyEvent(10, 'إيداع حساب المواطن', 'fa-house-user', '#3b82f6');
         addMonthlyEvent(1, 'الضمان الاجتماعي المطور', 'fa-hands-holding-child', '#2563eb');
@@ -151,11 +143,9 @@ export default function Home() {
         addMonthlyEvent(5, 'إعانة حافز', 'fa-briefcase', '#0ea5e9');
         addMonthlyEvent(25, 'معاشات التقاعد', 'fa-person-cane', '#475569');
 
-        // 2. الأحداث الوطنية
         addNationalEvent(9, 23, 'اليوم الوطني السعودي', 'fa-flag', '#16a34a');
         addNationalEvent(2, 22, 'يوم التأسيس السعودي', 'fa-monument', '#92400e');
 
-        // 3. الأحداث الدينية والأعياد
         addHijriEvent(9, 1, 'بداية شهر رمضان', 'fa-moon', '#8b5cf6');
         addHijriEvent(10, 1, 'عيد الفطر المبارك', 'fa-gift', '#f59e0b');
         addHijriEvent(12, 9, 'يوم عرفة', 'fa-mountain-sun', '#0d9488');
@@ -166,7 +156,6 @@ export default function Home() {
         setUpcomingEvents(events);
     };
 
-    // دالة مشاركة قائمة المواعيد
     const handleShareEvents = async () => {
         if (upcomingEvents.length === 0) return;
         
@@ -188,8 +177,7 @@ export default function Home() {
         }
     };
 
-    // دالة توليد قصة التاريخ المُدخل
-    const generateDateStory = (gregDate: Date, title: string, rawResultText: string) => {
+    const generateDateStory = (gregDate, title, rawResultText) => {
         const dName = daysAr[gregDate.getDay()];
         const m = gregDate.getMonth() + 1;
         let season = '';
@@ -215,12 +203,9 @@ export default function Home() {
         }
     };
 
-    // ==========================================
-    // ⚙️ 2. الدوال الحسابية الأساسية
-    // ==========================================
-    const formatDuration = (years: number, months: number, days: number) => {
+    const formatDuration = (years, months, days) => {
         const dict = i18n[lang];
-        const formatPart = (val: number, s: string, d: string, p: string, dp: string) => {
+        const formatPart = (val, s, d, p, dp) => {
             if (val === 0) return "";
             if (lang === 'en') return val === 1 ? `1 ${s}` : `${val} ${p}`;
             if (val === 1) return s; if (val === 2) return d;
@@ -235,7 +220,7 @@ export default function Home() {
         return parts.length === 0 ? dict.sameDay : parts.join(dict.and);
     };
 
-    const getExactDifference = (d1: Date, d2: Date) => {
+    const getExactDifference = (d1, d2) => {
         const start = new Date(Math.min(d1.getTime(), d2.getTime()));
         const end = new Date(Math.max(d1.getTime(), d2.getTime()));
         let years = end.getFullYear() - start.getFullYear();
@@ -246,14 +231,14 @@ export default function Home() {
         return { years, months, days };
     };
 
-    const getHijriParts = (dateObj: Date) => {
+    const getHijriParts = (dateObj) => {
         const parts = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', { day: 'numeric', month: 'numeric', year: 'numeric' }).formatToParts(dateObj);
         let y = 0, m = 0, d = 0;
         parts.forEach(p => { if(p.type === 'year') y = parseInt(p.value); if(p.type === 'month') m = parseInt(p.value); if(p.type === 'day') d = parseInt(p.value); });
         return { y, m, d };
     };
 
-    const hijriToGregorian = (hY: number, hM: number, hD: number) => {
+    const hijriToGregorian = (hY, hM, hD) => {
         let target = hY * 10000 + hM * 100 + hD; 
         let minDays = Math.floor(new Date(1900, 0, 1).getTime() / 86400000); 
         let maxDays = Math.floor(new Date(2100, 11, 31).getTime() / 86400000);
@@ -311,7 +296,7 @@ export default function Home() {
         const { d, m, y } = gConvInput;
         if (!d || !m || !y) return showNotification("errSelect");
         const gDate = new Date(`${y}-${m}-${String(d).padStart(2, '0')}`);
-        const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric', calendar: 'islamic-umalqura' };
+        const options = { year: 'numeric', month: 'long', day: 'numeric', calendar: 'islamic-umalqura' };
         const locale = lang === 'ar' ? 'ar-SA-u-ca-islamic-umalqura' : 'en-US-u-ca-islamic-umalqura';
         const hDate = new Intl.DateTimeFormat(locale, options).format(gDate);
         
@@ -325,7 +310,7 @@ export default function Home() {
         const { d, m, y } = hConvInput;
         if (!d || !m || !y) return showNotification("errSelect");
         let gDateObj = hijriToGregorian(parseInt(y), parseInt(m), parseInt(d));
-        const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' }; 
+        const options = { year: 'numeric', month: 'long', day: 'numeric' }; 
         const locale = lang === 'ar' ? 'ar-SA' : 'en-US';
         const gDateFormatted = new Intl.DateTimeFormat(locale, options).format(gDateObj);
         const suffix = lang === 'ar' ? ' م' : '';
@@ -376,19 +361,18 @@ export default function Home() {
         trackToolUsage('durationCalc');
     };
 
-    const renderDays = (max: number) => Array.from({ length: max }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>);
-    const renderMonths = (names: string[], isGreg: boolean) => names.map((name, i) => {
+    const renderDays = (max) => Array.from({ length: max }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>);
+    const renderMonths = (names, isGreg) => names.map((name, i) => {
         const val = isGreg ? String(i + 1).padStart(2, '0') : i + 1;
         return <option key={val} value={val}>{name}</option>;
     });
-    const renderYears = (start: number, end: number) => {
+    const renderYears = (start, end) => {
         const arr = [];
         for (let i = start; i >= end; i--) arr.push(<option key={i} value={i}>{i}</option>);
         return arr;
     };
 
-    // مكوّن عرض النتيجة + القصة + زر المشاركة
-    const ResultCard = ({ htmlContent }: { htmlContent: string }) => (
+    const ResultCard = ({ htmlContent }) => (
         <div className="result-container">
             <div className="result" style={{ display: 'block' }} dangerouslySetInnerHTML={{ __html: htmlContent }}></div>
             {enteredDateInfo && (
@@ -416,7 +400,6 @@ export default function Home() {
             <div className="container">
                 <Header lang={lang} isDarkMode={isDarkMode} toggleLang={toggleLang} toggleTheme={toggleTheme} />
 
-                {/* --- معلومات اليوم المطور --- */}
                 {lang === 'ar' && (
                     <div className="today-info-banner">
                         <div className="today-content">
@@ -431,7 +414,6 @@ export default function Home() {
                     <Script id="adsbygoogle-init" strategy="afterInteractive">{`(adsbygoogle = window.adsbygoogle || []).push({});`}</Script>
                 </div>
 
-                {/* --- مكتبة المواعيد السعودية القادمة --- */}
                 {lang === 'ar' && upcomingEvents.length > 0 && (
                     <div className="events-wrapper">
                         <div className="events-header">
@@ -456,7 +438,6 @@ export default function Home() {
                     </div>
                 )}
 
-                {/* --- حاسبة العمر --- */}
                 <div className="card">
                     <h2>{i18n[lang].hCalcAge}</h2>
                     <div className="split-section">
@@ -497,7 +478,6 @@ export default function Home() {
                     </a>
                 </div>
 
-                {/* --- تحويل التاريخ --- */}
                 <div className="card">
                     <h2>{i18n[lang].hConv}</h2>
                     <div className="split-section">
@@ -530,7 +510,6 @@ export default function Home() {
                     </div>
                 </div>
 
-                {/* --- الفرق بين تاريخين --- */}
                 <div className="card">
                     <h2>{i18n[lang].hDiff}</h2>
                     <div className="split-section">
@@ -580,13 +559,8 @@ export default function Home() {
                     <div className="ad-placeholder" data-ad-location="bottom-banner-2">{i18n[lang].adBanner2}</div>
                 </div>
 
-                {/* ==========================================
-                    🚀 3. أقسام السيو (SEO) الغنية
-                    ========================================== */}
                 {lang === 'ar' && (
                     <div className="seo-sections-wrapper">
-                        
-                        {/* الدليل والأهمية */}
                         <section className="seo-card">
                             <h2 className="seo-title"><i className="fa-solid fa-book-open"></i> دليلك لمعرفة أهمية تحويل التواريخ</h2>
                             <p className="seo-text">
@@ -598,7 +572,6 @@ export default function Home() {
                             </p>
                         </section>
 
-                        {/* الأسئلة الشائعة (FAQ) */}
                         <section className="seo-card">
                             <h2 className="seo-title"><i className="fa-regular fa-circle-question"></i> الأسئلة الشائعة</h2>
                             
